@@ -18,7 +18,7 @@ public class DeleteProjectUseCase
         if (project == null)
             throw new Exception("Project not found");
 
-        _repo.DeleteAsync(project);
+        _repo.Delete(project);
 
         await _repo.SaveChangesAsync();
     }

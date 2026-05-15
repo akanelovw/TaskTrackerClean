@@ -18,7 +18,7 @@ public class DeleteWorkItemUseCase
         if (item == null)
             throw new Exception("WorkItem not found");
 
-        await _repo.DeleteAsync(item);
+        _repo.Delete(item);
 
         await _repo.SaveChangesAsync();
     }

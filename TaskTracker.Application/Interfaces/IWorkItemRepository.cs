@@ -6,6 +6,6 @@ public interface IWorkItemRepository
 {
     Task<WorkItem?> GetByIdAsync(int id);
     Task AddAsync(WorkItem workItem);
-    Task DeleteAsync(WorkItem workItem);
+    void Delete(WorkItem workItem);
     Task SaveChangesAsync();
 }

@@ -20,6 +20,10 @@ public class Project
 
     public string? ManagerUserId { get; private set; }
 
+    private readonly List<Document> _documents = new();
+
+    public IReadOnlyCollection<Document> Documents => _documents;
+
     private readonly List<ProjectMember> _members = new();
     public IReadOnlyCollection<ProjectMember> Members => _members;
 
@@ -101,7 +105,16 @@ public class Project
     {
         Priority = priority;
     }
+    public void AddDocument(Document document)
+    {
+        _documents.Add(document);
+    }
+    public void RemoveDocument(Document document)
+    {
+        _documents.Remove(document);
+    }
 
     public bool HasMember(string userId)
         => _members.Any(x => x.UserId == userId);
 }
+

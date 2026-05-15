@@ -10,7 +10,7 @@ public interface IProjectRepository
 
     Task AddAsync(Project project);
 
-    Task DeleteAsync(Project project);
+    void Delete(Project project);
 
     Task SaveChangesAsync();
 }
