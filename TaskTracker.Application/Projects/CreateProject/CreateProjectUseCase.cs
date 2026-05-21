@@ -16,7 +16,7 @@ public class CreateProjectUseCase
         _userService = userService;
     }
 
-    public async Task Execute(CreateProjectRequest request)
+    public async Task<int> Execute(CreateProjectRequest request)
     {
         var userId = _userService.GetCurrentUserId();
 
@@ -32,5 +32,7 @@ public class CreateProjectUseCase
 
         await _repo.AddAsync(project);
         await _repo.SaveChangesAsync();
+
+        return project.Id;
     }
 }

@@ -1,5 +1,7 @@
 ﻿using TaskTracker.Application.Interfaces;
 
+namespace TaskTracker.Application.WorkItems.AssignUser;
+
 public class AssignUserUseCase
 {
     private readonly IWorkItemRepository _repo;

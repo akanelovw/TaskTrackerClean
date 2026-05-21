@@ -16,10 +16,12 @@ public class UpdateWorkItemUseCase
         var item = await _repo.GetByIdAsync(request.Id);
 
         if (item == null)
-            throw new Exception("WorkItem not found");
+            throw new Exception("Work item not found");
 
         item.UpdateTitle(request.Title);
+
         item.UpdateComment(request.Comment);
+
         item.ChangePriority(request.Priority);
 
         await _repo.SaveChangesAsync();
