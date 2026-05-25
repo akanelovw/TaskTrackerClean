@@ -11,7 +11,7 @@ public class ProjectMemberConfiguration
     {
         builder.ToTable("ProjectMembers");
 
-        builder.HasKey(x => x.Id);
+        builder.HasKey(x => x.ProjectId);
 
         builder.Property(x => x.UserId)
             .IsRequired();

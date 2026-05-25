@@ -1,6 +1,19 @@
 <Solution>
-  <Project Path="TaskTracker.Application/TaskTracker.Application.csproj" />
-  <Project Path="TaskTracker.Domain/TaskTracker.Domain.csproj" />
-  <Project Path="TaskTracker.Infrastructure/TaskTracker.Infrastructure.csproj" />
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="Test" />
+  </Configurations>
+  <Project Path="TaskTracker.Application/TaskTracker.Application.csproj">
+    <Build Solution="Test|*" Project="false" />
+  </Project>
+  <Project Path="TaskTracker.Domain/TaskTracker.Domain.csproj">
+    <BuildType Solution="Test|*" Project="Release" />
+    <Build Solution="Test|*" Project="false" />
+  </Project>
+  <Project Path="TaskTracker.Infrastructure/TaskTracker.Infrastructure.csproj">
+    <BuildType Solution="Test|*" Project="Release" />
+    <Build Solution="Test|*" Project="false" />
+  </Project>
   <Project Path="TaskTracker.WebApi/TaskTracker.WebApi.csproj" />
 </Solution>

@@ -16,27 +16,39 @@ public class JwtProvider : IJwtProvider
         _configuration = configuration;
     }
 
-    public string GenerateToken(string userId, string email)
+    public string GenerateToken(
+        string userId,
+        string email,
+        IList<string> roles)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Email, email)
+            new(ClaimTypes.NameIdentifier, userId),
+            new(ClaimTypes.Email, email)
         };
 
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(
-                _configuration["Jwt:Key"]!));
+        // 🔥 roles claims
+        claims.AddRange(
+            roles.Select(role =>
+                new Claim(ClaimTypes.Role, role)));
 
-        var creds = new SigningCredentials(
-            key,
-            SecurityAlgorithms.HmacSha256);
+        var key =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _configuration["Jwt:Key"]!));
 
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
-            signingCredentials: creds);
+        var credentials =
+            new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var token =
+            new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler()
+            .WriteToken(token);
     }
 }

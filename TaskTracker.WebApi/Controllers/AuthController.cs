@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Application.Auth.Login;
-using TaskTracker.Application.Auth.Register;
+using TaskTracker.Application.Users.Register;
 
 namespace TaskTracker.Api.Controllers;
 
@@ -8,10 +8,10 @@ namespace TaskTracker.Api.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly RegisterUseCase _register;
+    private readonly CreateUserUseCase _register;
     private readonly LoginUseCase _login;
 
-    public AuthController(RegisterUseCase register, LoginUseCase login)
+    public AuthController(CreateUserUseCase register, LoginUseCase login)
     {
         _register = register;
         _login = login;
