@@ -1,14 +1,18 @@
-﻿using TaskTracker.Application.Interfaces;
+﻿using TaskTracker.Application.Common;
+using TaskTracker.Application.Common.Exceptions;
+using TaskTracker.Application.Interfaces;
 
 namespace TaskTracker.Application.Projects.DeleteProject;
 
 public class DeleteProjectUseCase
 {
     private readonly IProjectRepository _repo;
+    private readonly IUserService _userService;
 
-    public DeleteProjectUseCase(IProjectRepository repo)
+    public DeleteProjectUseCase(IProjectRepository repo, IUserService userService)
     {
         _repo = repo;
+        _userService = userService;
     }
 
     public async Task Execute(DeleteProjectRequest request)
@@ -16,10 +20,24 @@ public class DeleteProjectUseCase
         var project = await _repo.GetByIdAsync(request.Id);
 
         if (project == null)
-            throw new Exception("Project not found");
+        {
+            throw new NotFoundException("Project not found");
+        }
 
-        _repo.Delete(project);
+        var userId =
+            _userService.GetCurrentUserId();
 
-        await _repo.SaveChangesAsync();
+        if (!_userService.IsInRole(Roles.Admin) &&
+            !_userService.IsInRole(
+                Roles.ChiefProjectManager))
+        {
+            if (project.ManagerUserId != userId)
+            {
+                throw new ForbiddenException();
+            }
+        }
+
+        await _repo.DeleteAsync(project);
+
     }
 }

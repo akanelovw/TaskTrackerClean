@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TaskTracker.Application.WorkItems.CreateWorkItem;
-using TaskTracker.Application.WorkItems.ChangeStatus;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Application.WorkItems.AssignUser;
-using TaskTracker.Application.WorkItems.UpdateWorkItem;
+using TaskTracker.Application.WorkItems.ChangeStatus;
+using TaskTracker.Application.WorkItems.CreateWorkItem;
 using TaskTracker.Application.WorkItems.DeleteWorkItem;
+using TaskTracker.Application.WorkItems.GetWorkItems;
+using TaskTracker.Application.WorkItems.UpdateWorkItem;
 
 namespace TaskTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/workitems")]
+[Authorize]
 public class WorkItemsController : ControllerBase
 {
     private readonly CreateWorkItemUseCase _create;
@@ -17,26 +20,40 @@ public class WorkItemsController : ControllerBase
     private readonly UpdateWorkItemUseCase _update;
     private readonly DeleteWorkItemUseCase _delete;
 
+    private readonly GetWorkItemsUseCase _list;
+
     public WorkItemsController(
         CreateWorkItemUseCase create,
         ChangeWorkItemStatusUseCase changeStatus,
         AssignUserUseCase assign,
         UpdateWorkItemUseCase update,
-        DeleteWorkItemUseCase delete)
+        DeleteWorkItemUseCase delete,
+        GetWorkItemsUseCase list)
     {
         _create = create;
         _changeStatus = changeStatus;
         _assign = assign;
         _update = update;
         _delete = delete;
+
+        _list = list;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _list.Execute();
+
+        return Ok(result);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateWorkItemRequest request)
+    public async Task<IActionResult> Create(
+        CreateWorkItemRequest request)
     {
-        await _create.Execute(request);
+        var result = await _create.Execute(request);
 
-        return Ok();
+        return Ok(result);
     }
 
     [HttpPut("{id}")]

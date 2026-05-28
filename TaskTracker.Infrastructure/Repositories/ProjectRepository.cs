@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using TaskTracker.Application.Interfaces;
 using TaskTracker.Domain.Entities;
 using TaskTracker.Infrastructure.Persistence;
@@ -9,7 +10,8 @@ public class ProjectRepository : IProjectRepository
 {
     private readonly ApplicationDbContext _context;
 
-    public ProjectRepository(ApplicationDbContext context)
+    public ProjectRepository(
+        ApplicationDbContext context)
     {
         _context = context;
     }
@@ -17,26 +19,36 @@ public class ProjectRepository : IProjectRepository
     public async Task<Project?> GetByIdAsync(int id)
     {
         return await _context.Projects
-            .Include(x => x.Documents)
             .Include(x => x.Members)
+            .Include(x => x.Documents)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<List<Project>> GetAllAsync()
+    public async Task<IEnumerable<Project>> GetAllAsync()
     {
         return await _context.Projects
-            .Include(x => x.Documents)
             .Include(x => x.Members)
+            .Include(x => x.Documents)
             .ToListAsync();
     }
 
-    public async Task<List<Project>> GetProjectsForUserAsync(string userId)
+    public async Task<IEnumerable<Project>>
+        GetByManagerAsync(string managerId)
     {
         return await _context.Projects
-            .Include(x => x.Documents)
             .Include(x => x.Members)
+            .Include(x => x.Documents)
+            .Where(x => x.ManagerUserId == managerId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Project>>
+        GetByMemberAsync(string userId)
+    {
+        return await _context.Projects
+            .Include(x => x.Members)
+            .Include(x => x.Documents)
             .Where(x =>
-                x.ManagerUserId == userId ||
                 x.Members.Any(m => m.UserId == userId))
             .ToListAsync();
     }
@@ -44,15 +56,21 @@ public class ProjectRepository : IProjectRepository
     public async Task AddAsync(Project project)
     {
         await _context.Projects.AddAsync(project);
+
+        await _context.SaveChangesAsync();
     }
 
-    public void Delete(Project project)
+    public async Task UpdateAsync(Project project)
+    {
+        _context.Projects.Update(project);
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Project project)
     {
         _context.Projects.Remove(project);
-    }
 
-    public async Task SaveChangesAsync()
-    {
         await _context.SaveChangesAsync();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Application.Auth.Login;
-using TaskTracker.Application.Users.Register;
+using TaskTracker.Application.Users.CreateUser;
 
 namespace TaskTracker.Api.Controllers;
 
@@ -18,7 +18,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register(CreateUserRequest request)
     {
         var result = await _register.Execute(request);
         return Ok(result);

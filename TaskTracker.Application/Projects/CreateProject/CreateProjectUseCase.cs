@@ -1,4 +1,6 @@
-﻿using TaskTracker.Application.Interfaces;
+﻿using TaskTracker.Application.Common;
+using TaskTracker.Application.Common.Exceptions;
+using TaskTracker.Application.Interfaces;
 using TaskTracker.Domain.Entities;
 
 namespace TaskTracker.Application.Projects.CreateProject;
@@ -18,7 +20,15 @@ public class CreateProjectUseCase
 
     public async Task<int> Execute(CreateProjectRequest request)
     {
-        var userId = _userService.GetCurrentUserId();
+        var allowed =
+            _userService.IsInRole(Roles.Admin) ||
+            _userService.IsInRole(Roles.ChiefProjectManager);
+
+        if (!allowed)
+            throw new ForbiddenException();
+
+        var currentUserId =
+            _userService.GetCurrentUserId();
 
         var project = new Project(
             request.Title,
@@ -27,11 +37,10 @@ public class CreateProjectUseCase
             request.StartTime,
             request.EndTime,
             request.Priority,
-            userId
+            currentUserId
         );
 
         await _repo.AddAsync(project);
-        await _repo.SaveChangesAsync();
 
         return project.Id;
     }

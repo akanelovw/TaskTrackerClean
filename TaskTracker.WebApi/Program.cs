@@ -1,14 +1,13 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
 using Scalar.AspNetCore;
-
+using System.Security.Claims;
+using System.Text;
+using TaskTracker.Api.Middleware;
 using TaskTracker.Application;
 using TaskTracker.Application.Interfaces;
-
 using TaskTracker.Infrastructure.Identity;
 using TaskTracker.Infrastructure.Persistence;
 using TaskTracker.Infrastructure.Repositories;
@@ -49,26 +48,25 @@ builder.Services
 // ================= JWT =================
 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
     {
-        options.TokenValidationParameters =
-            new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey =
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
 
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            builder.Configuration["Jwt:Key"]!))
-            };
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = ClaimTypes.NameIdentifier
+        };
     });
 
 builder.Services.AddAuthorization();
-
 
 // ================= HTTP CONTEXT =================
 
@@ -128,6 +126,9 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+// ================= MIDDLEWARE =================
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // ================= CONTROLLERS =================
 
@@ -140,6 +141,13 @@ using (var scope = app.Services.CreateScope())
             .GetRequiredService<RoleManager<IdentityRole>>();
 
     await RoleSeeder.SeedAsync(roleManager);
+
+    var userManager =
+        scope.ServiceProvider
+            .GetRequiredService<UserManager<AppUser>>();
+
+    await AdminSeeder.SeedAsync(userManager);
 }
+
 
 app.Run();

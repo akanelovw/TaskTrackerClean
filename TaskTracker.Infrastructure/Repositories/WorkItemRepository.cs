@@ -13,6 +13,17 @@ public class WorkItemRepository : IWorkItemRepository
     {
         _context = context;
     }
+    public async Task<List<WorkItem>> GetAllAsync()
+    {
+        return await _context.WorkItems.ToListAsync();
+    }
+
+    public async Task<List<WorkItem>> GetByAssigneeAsync(string userId)
+    {
+        return await _context.WorkItems
+            .Where(x => x.AssignedUserId == userId)
+            .ToListAsync();
+    }
 
     public async Task<WorkItem?> GetByIdAsync(int id)
     {
@@ -30,15 +41,18 @@ public class WorkItemRepository : IWorkItemRepository
     public async Task AddAsync(WorkItem workItem)
     {
         await _context.WorkItems.AddAsync(workItem);
+        await _context.SaveChangesAsync();
+    }
+    public async Task UpdateAsync(WorkItem workItem)
+    {
+        _context.WorkItems.Update(workItem);
+        await _context.SaveChangesAsync();
     }
 
-    public void Delete(WorkItem workItem)
+    public async Task DeleteAsync(WorkItem workItem)
     {
         _context.WorkItems.Remove(workItem);
-    }
 
-    public async Task SaveChangesAsync()
-    {
         await _context.SaveChangesAsync();
     }
 }

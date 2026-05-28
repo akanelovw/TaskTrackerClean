@@ -6,17 +6,19 @@ public class Project
 {
     public int Id { get; private set; }
 
-    public string Title { get; private set; }
+    public string Title { get; private set; } = null!;
 
-    public string CustomerCompany { get; private set; }
+    public string CustomerCompany { get; private set; } = null!;
 
-    public string ExecutorCompany { get; private set; }
+    public string ExecutorCompany { get; private set; } = null!;
 
     public DateTime StartTime { get; private set; }
 
     public DateTime EndTime { get; private set; }
 
     public ProjectPriority Priority { get; private set; }
+
+    public ProjectStatus Status { get; private set; }
 
     public string? ManagerUserId { get; private set; }
 
@@ -27,7 +29,7 @@ public class Project
     private readonly List<ProjectMember> _members = new();
     public IReadOnlyCollection<ProjectMember> Members => _members;
 
-    private Project() { } // EF
+    private Project() { }
 
     public Project(
         string title,
@@ -105,10 +107,17 @@ public class Project
     {
         Priority = priority;
     }
+
+    public void ChangeStatus(ProjectStatus status)
+    {
+        Status = status;
+    }
+
     public void AddDocument(Document document)
     {
         _documents.Add(document);
     }
+
     public void RemoveDocument(Document document)
     {
         _documents.Remove(document);

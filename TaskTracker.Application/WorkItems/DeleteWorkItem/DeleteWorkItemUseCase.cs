@@ -1,4 +1,5 @@
-﻿using TaskTracker.Application.Interfaces;
+﻿using TaskTracker.Application.Common.Exceptions;
+using TaskTracker.Application.Interfaces;
 
 namespace TaskTracker.Application.WorkItems.DeleteWorkItem;
 
@@ -16,10 +17,8 @@ public class DeleteWorkItemUseCase
         var item = await _repo.GetByIdAsync(request.Id);
 
         if (item == null)
-            throw new Exception("WorkItem not found");
+            throw new NotFoundException("WorkItem not found");
 
-        _repo.Delete(item);
-
-        await _repo.SaveChangesAsync();
+        await _repo.DeleteAsync(item);
     }
 }

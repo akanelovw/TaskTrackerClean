@@ -6,11 +6,17 @@ public interface IProjectRepository
 {
     Task<Project?> GetByIdAsync(int id);
 
-    Task<List<Project>> GetAllAsync();
+    Task<IEnumerable<Project>> GetAllAsync();
+
+    Task<IEnumerable<Project>> GetByManagerAsync(
+        string managerId);
+
+    Task<IEnumerable<Project>> GetByMemberAsync(
+        string userId);
 
     Task AddAsync(Project project);
 
-    void Delete(Project project);
+    Task UpdateAsync(Project project);
 
-    Task SaveChangesAsync();
+    Task DeleteAsync(Project project);
 }

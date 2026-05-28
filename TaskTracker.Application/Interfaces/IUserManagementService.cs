@@ -2,7 +2,7 @@
 
 public interface IUserManagementService
 {
-    Task CreateUserAsync(
+    Task<string> CreateUserAsync(
         string email,
         string password,
         string firstName,

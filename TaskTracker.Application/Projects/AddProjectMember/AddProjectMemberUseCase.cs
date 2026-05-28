@@ -2,34 +2,26 @@
 using TaskTracker.Application.Common.Exceptions;
 using TaskTracker.Application.Interfaces;
 
-namespace TaskTracker.Application.WorkItems.AssignUser;
+namespace TaskTracker.Application.Projects.AddProjectMember;
 
-public class AssignUserUseCase
+public class AddProjectMemberUseCase
 {
-    private readonly IWorkItemRepository _workItemRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IUserService _userService;
 
-    public AssignUserUseCase(
-        IWorkItemRepository workItemRepository,
+    public AddProjectMemberUseCase(
         IProjectRepository projectRepository,
         IUserService userService)
     {
-        _workItemRepository = workItemRepository;
         _projectRepository = projectRepository;
         _userService = userService;
     }
 
-    public async Task Execute(AssignUserRequest request)
+    public async Task Execute(AddProjectMemberRequest request)
     {
         var currentUserId = _userService.GetCurrentUserId();
 
-        var workItem = await _workItemRepository.GetByIdAsync(request.WorkItemId);
-
-        if (workItem == null)
-            throw new NotFoundException("Work item not found");
-
-        var project = await _projectRepository.GetByIdAsync(workItem.ProjectId);
+        var project = await _projectRepository.GetByIdAsync(request.ProjectId);
 
         if (project == null)
             throw new NotFoundException("Project not found");
@@ -37,9 +29,9 @@ public class AssignUserUseCase
         if (_userService.IsInRole(Roles.Admin) ||
             _userService.IsInRole(Roles.ChiefProjectManager))
         {
-            workItem.AssignUser(request.UserId);
+            project.AddMember(request.UserId);
 
-            await _workItemRepository.UpdateAsync(workItem);
+            await _projectRepository.UpdateAsync(project);
             return;
         }
 
@@ -48,12 +40,9 @@ public class AssignUserUseCase
             if (project.ManagerUserId != currentUserId)
                 throw new ForbiddenException();
 
-            if (!project.HasMember(request.UserId))
-                throw new ValidationException("User is not project member");
+            project.AddMember(request.UserId);
 
-            workItem.AssignUser(request.UserId);
-
-            await _workItemRepository.UpdateAsync(workItem);
+            await _projectRepository.UpdateAsync(project);
             return;
         }
 

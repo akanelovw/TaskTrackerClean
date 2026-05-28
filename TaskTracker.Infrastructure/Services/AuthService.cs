@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
+using TaskTracker.Application.Common.Exceptions;
 using TaskTracker.Application.Interfaces;
 using TaskTracker.Infrastructure.Identity;
 
@@ -27,7 +28,7 @@ public class AuthService : IAuthService
             await _userManager.FindByEmailAsync(email);
 
         if (user == null)
-            throw new Exception("Invalid credentials");
+            throw new UnauthorizedException("Invalid credentials");
 
         var valid =
             await _userManager.CheckPasswordAsync(
@@ -35,13 +36,11 @@ public class AuthService : IAuthService
                 password);
 
         if (!valid)
-            throw new Exception("Invalid credentials");
+            throw new UnauthorizedException("Invalid credentials");
 
-        // 🔥 roles
         var roles =
             await _userManager.GetRolesAsync(user);
 
-        // 🔥 JWT with roles
         return _jwtProvider.GenerateToken(
             user.Id,
             user.Email!,

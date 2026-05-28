@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+
 using TaskTracker.Application.Interfaces;
 using TaskTracker.Infrastructure.Identity;
 
@@ -9,6 +10,7 @@ namespace TaskTracker.Infrastructure.Services;
 public class UserService : IUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+
     private readonly UserManager<AppUser> _userManager;
 
     public UserService(
@@ -21,7 +23,8 @@ public class UserService : IUserService
 
     public string GetCurrentUserId()
     {
-        var userId = _httpContextAccessor.HttpContext?
+        var userId = _httpContextAccessor
+            .HttpContext?
             .User
             .FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -33,8 +36,16 @@ public class UserService : IUserService
 
     public async Task<bool> ExistsAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user =
+            await _userManager.FindByIdAsync(userId);
 
         return user != null;
+    }
+
+    public bool IsInRole(string role)
+    {
+        return _httpContextAccessor.HttpContext?
+            .User?
+            .IsInRole(role) ?? false;
     }
 }
