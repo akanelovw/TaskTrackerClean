@@ -32,7 +32,7 @@ public class AssignProjectManagerUseCase
             throw new ForbiddenException();
         }
         if (!project.HasMember(request.UserId))
-            throw new ValidationException("User is not project member");
+            throw new BadRequestException("User is not project member");
 
         project.ChangeManager(request.UserId);
 

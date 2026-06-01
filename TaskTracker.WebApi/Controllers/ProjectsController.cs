@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskTracker.Api.Common;
 using TaskTracker.Application.Projects.AddProjectMember;
 using TaskTracker.Application.Projects.AssignProjectManager;
 using TaskTracker.Application.Projects.ChangeProjectStatus;
@@ -43,110 +44,105 @@ public class ProjectsController : ControllerBase
         _details = details;
         _update = update;
         _delete = delete;
-
         _assignManager = assignManager;
         _changeProjectStatus = changeProjectStatus;
         _addMember = addMember;
         _removeMember = removeMember;
     }
 
+    // ================= GET ALL =================
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] GetProjectsListRequest request)
     {
-        var result = await _list.Execute();
+        var result = await _list.Execute(request);
 
-        return Ok(result);
+        return Ok(ApiResponse.Ok(result));
     }
 
+    // ================= GET BY ID =================
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _details.Execute(id);
 
-        return Ok(result);
+        return Ok(ApiResponse.Ok(result));
     }
 
+    // ================= CREATE =================
     [HttpPost]
-    public async Task<IActionResult> Create(
-        CreateProjectRequest request)
+    public async Task<IActionResult> Create(CreateProjectRequest request)
     {
         var result = await _create.Execute(request);
 
-        return Ok(result);
+        return Ok(ApiResponse.Ok(result, "Project created"));
     }
 
+    // ================= UPDATE =================
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(
-        int id,
-        UpdateProjectRequest request)
+    public async Task<IActionResult> Update(int id, UpdateProjectRequest request)
     {
         request.Id = id;
 
         await _update.Execute(request);
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Project updated"));
     }
 
+    // ================= DELETE =================
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _delete.Execute(
-            new DeleteProjectRequest
-            {
-                Id = id
-            });
+        await _delete.Execute(new DeleteProjectRequest
+        {
+            Id = id
+        });
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Project deleted"));
     }
 
+    // ================= ASSIGN MANAGER =================
     [HttpPut("{projectId}/manager")]
-    public async Task<IActionResult> AssignManager(
-        int projectId,
-        AssignProjectManagerRequest request)
+    public async Task<IActionResult> AssignManager(int projectId, AssignProjectManagerRequest request)
     {
         request.ProjectId = projectId;
 
         await _assignManager.Execute(request);
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Manager assigned"));
     }
 
+    // ================= ADD MEMBER =================
     [HttpPost("{projectId}/members")]
-    public async Task<IActionResult> AddMember(
-        int projectId,
-        AddProjectMemberRequest request)
+    public async Task<IActionResult> AddMember(int projectId, AddProjectMemberRequest request)
     {
         request.ProjectId = projectId;
 
         await _addMember.Execute(request);
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Member added"));
     }
 
+    // ================= CHANGE STATUS =================
     [HttpPut("{id}/status")]
-    public async Task<IActionResult> ChangeStatus(
-    int id,
-    ChangeProjectStatusRequest request)
+    public async Task<IActionResult> ChangeStatus(int id, ChangeProjectStatusRequest request)
     {
         request.ProjectId = id;
 
         await _changeProjectStatus.Execute(request);
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Status updated"));
     }
 
+    // ================= REMOVE MEMBER =================
     [HttpDelete("{projectId}/members/{userId}")]
-    public async Task<IActionResult> RemoveMember(
-        int projectId,
-        string userId)
+    public async Task<IActionResult> RemoveMember(int projectId, string userId)
     {
-        await _removeMember.Execute(
-            new RemoveProjectMemberRequest
-            {
-                ProjectId = projectId,
-                UserId = userId
-            });
+        await _removeMember.Execute(new RemoveProjectMemberRequest
+        {
+            ProjectId = projectId,
+            UserId = userId
+        });
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Member removed"));
     }
 }

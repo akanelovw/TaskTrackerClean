@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text;
+using TaskTracker.Api.Filters;
 using TaskTracker.Api.Middleware;
 using TaskTracker.Application;
 using TaskTracker.Application.Interfaces;
@@ -17,8 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ================= CONTROLLERS =================
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
 
+// ================= VALIDATORS =================
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // ================= OPENAPI =================
 
@@ -28,7 +35,6 @@ builder.Services.AddOpenApi();
 // ================= SCALAR UI =================
 
 builder.Services.AddEndpointsApiExplorer();
-
 
 // ================= DATABASE =================
 

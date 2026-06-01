@@ -32,10 +32,7 @@ public class ChangeProjectStatusUseCase
         if (!isAllowed)
             throw new ForbiddenException();
 
-        if (!Enum.TryParse<ProjectStatus>(request.Status, out var status))
-            throw new ValidationException("Invalid status");
-
-        project.ChangeStatus(status);
+        project.ChangeStatus(request.Status);
 
         await _repo.UpdateAsync(project);
     }

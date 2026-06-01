@@ -16,4 +16,6 @@ public interface IWorkItemRepository
     Task<List<WorkItem>> GetAllAsync();
 
     Task<List<WorkItem>> GetByAssigneeAsync(string userId);
+
+    IQueryable<WorkItem> Query();
 }

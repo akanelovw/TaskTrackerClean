@@ -7,29 +7,21 @@ public class Project
     public int Id { get; private set; }
 
     public string Title { get; private set; } = null!;
-
     public string CustomerCompany { get; private set; } = null!;
-
     public string ExecutorCompany { get; private set; } = null!;
 
     public DateTime StartTime { get; private set; }
-
     public DateTime EndTime { get; private set; }
 
     public ProjectPriority Priority { get; private set; }
-
     public ProjectStatus Status { get; private set; }
 
     public string? ManagerUserId { get; private set; }
 
-    private readonly List<Document> _documents = new();
+    public List<Document> Documents { get; private set; } = new();
+    public List<ProjectMember> Members { get; private set; } = new();
 
-    public IReadOnlyCollection<Document> Documents => _documents;
-
-    private readonly List<ProjectMember> _members = new();
-    public IReadOnlyCollection<ProjectMember> Members => _members;
-
-    private Project() { }
+    private Project() { } 
 
     public Project(
         string title,
@@ -43,6 +35,12 @@ public class Project
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("Title is required");
 
+        if (string.IsNullOrWhiteSpace(customerCompany))
+            throw new ArgumentException("CustomerCompany is required");
+
+        if (string.IsNullOrWhiteSpace(executorCompany))
+            throw new ArgumentException("ExecutorCompany is required");
+
         if (startTime > endTime)
             throw new ArgumentException("StartTime cannot be after EndTime");
 
@@ -53,6 +51,8 @@ public class Project
         EndTime = endTime;
         Priority = priority;
         ManagerUserId = managerUserId;
+
+        Status = ProjectStatus.Active;
     }
 
     public void Update(
@@ -63,8 +63,16 @@ public class Project
         DateTime endTime,
         ProjectPriority priority)
     {
+        EnsureNotArchived();
+
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("Title is required");
+
+        if (string.IsNullOrWhiteSpace(customerCompany))
+            throw new ArgumentException("CustomerCompany is required");
+
+        if (string.IsNullOrWhiteSpace(executorCompany))
+            throw new ArgumentException("ExecutorCompany is required");
 
         if (startTime > endTime)
             throw new ArgumentException("Invalid dates");
@@ -79,24 +87,30 @@ public class Project
 
     public void AddMember(string userId)
     {
+        EnsureNotArchived();
+
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("UserId is required");
 
-        if (_members.Any(x => x.UserId == userId))
+        if (Members.Any(x => x.UserId == userId))
             return;
 
-        _members.Add(new ProjectMember(Id, userId));
+        Members.Add(new ProjectMember(Id, userId));
     }
 
     public void RemoveMember(string userId)
     {
-        var member = _members.FirstOrDefault(x => x.UserId == userId);
+        EnsureNotArchived();
+
+        var member = Members.FirstOrDefault(x => x.UserId == userId);
         if (member != null)
-            _members.Remove(member);
+            Members.Remove(member);
     }
 
     public void ChangeManager(string userId)
     {
+        EnsureNotArchived();
+
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("Manager is required");
 
@@ -105,25 +119,42 @@ public class Project
 
     public void ChangePriority(ProjectPriority priority)
     {
+        EnsureNotArchived();
         Priority = priority;
     }
 
     public void ChangeStatus(ProjectStatus status)
     {
+        EnsureNotArchived();
         Status = status;
     }
 
     public void AddDocument(Document document)
     {
-        _documents.Add(document);
+        EnsureNotArchived();
+
+        if (document == null)
+            throw new ArgumentNullException(nameof(document));
+
+        Documents.Add(document);
     }
 
     public void RemoveDocument(Document document)
     {
-        _documents.Remove(document);
+        EnsureNotArchived();
+
+        if (document == null)
+            throw new ArgumentNullException(nameof(document));
+
+        Documents.Remove(document);
     }
 
     public bool HasMember(string userId)
-        => _members.Any(x => x.UserId == userId);
-}
+        => Members.Any(x => x.UserId == userId);
 
+    private void EnsureNotArchived()
+    {
+        if (Status == ProjectStatus.Archived)
+            throw new InvalidOperationException("Archived project cannot be modified");
+    }
+}

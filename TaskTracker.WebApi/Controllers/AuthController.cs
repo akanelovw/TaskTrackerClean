@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TaskTracker.Api.Common;
 using TaskTracker.Application.Auth.Login;
 using TaskTracker.Application.Users.CreateUser;
 
@@ -17,17 +18,12 @@ public class AuthController : ControllerBase
         _login = login;
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(CreateUserRequest request)
-    {
-        var result = await _register.Execute(request);
-        return Ok(result);
-    }
-
+    // ================= LOGIN =================
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var token = await _login.Execute(request);
-        return Ok(token);
+
+        return Ok(ApiResponse.Ok(token));
     }
 }

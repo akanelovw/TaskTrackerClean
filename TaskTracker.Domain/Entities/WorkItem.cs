@@ -6,11 +6,11 @@ public class WorkItem
 {
     public int Id { get; private set; }
 
-    public string Title { get; private set; }
+    public string Title { get; private set; } = null!;
 
     public string? Comment { get; private set; }
 
-    public string CreatedByUserId { get; private set; }
+    public string CreatedByUserId { get; private set; } = null!;
 
     public string? AssignedUserId { get; private set; }
 
@@ -20,7 +20,7 @@ public class WorkItem
 
     public int ProjectId { get; private set; }
 
-    private WorkItem() { } // EF Core
+    private WorkItem() { } 
 
     public WorkItem(
         string title,

@@ -55,4 +55,9 @@ public class WorkItemRepository : IWorkItemRepository
 
         await _context.SaveChangesAsync();
     }
+
+    public IQueryable<WorkItem> Query()
+    {
+        return _context.WorkItems;
+    }
 }

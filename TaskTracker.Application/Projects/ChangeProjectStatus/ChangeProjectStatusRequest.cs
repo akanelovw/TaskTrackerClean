@@ -1,8 +1,10 @@
-﻿namespace TaskTracker.Application.Projects.ChangeProjectStatus;
+﻿using TaskTracker.Domain.Enums;
+
+namespace TaskTracker.Application.Projects.ChangeProjectStatus;
 
 public class ChangeProjectStatusRequest
 {
     public int ProjectId { get; set; }
 
-    public string Status { get; set; } = null!;
+    public ProjectStatus Status { get; set; }
 }

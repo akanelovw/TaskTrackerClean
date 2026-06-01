@@ -1,13 +1,11 @@
 ﻿using TaskTracker.Application.Common;
 using TaskTracker.Application.Interfaces;
-using TaskTracker.Domain.Entities;
 
 namespace TaskTracker.Application.Projects.GetProjectsList;
 
 public class GetProjectsListUseCase
 {
     private readonly IProjectRepository _repository;
-
     private readonly IUserService _userService;
 
     public GetProjectsListUseCase(
@@ -18,30 +16,61 @@ public class GetProjectsListUseCase
         _userService = userService;
     }
 
-    public async Task<IEnumerable<Project>> Execute()
+    public async Task<List<GetProjectsListResponse>> Execute(
+        GetProjectsListRequest request)
     {
-        var userId =
-            _userService.GetCurrentUserId();
+        var userId = _userService.GetCurrentUserId();
 
-        if (_userService.IsInRole(Roles.Admin))
+        var query = _repository.Query();
+
+        var isAdmin =
+            _userService.IsInRole(Roles.Admin) ||
+            _userService.IsInRole(Roles.ChiefProjectManager);
+
+        if (!isAdmin)
         {
-            return await _repository.GetAllAsync();
+            if (_userService.IsInRole(Roles.ProjectManager))
+            {
+                query = query.Where(x =>
+                    x.ManagerUserId == userId);
+            }
+            else
+            {
+                query = query.Where(x =>
+                    x.Members.Any(m => m.UserId == userId));
+            }
         }
 
-        if (_userService.IsInRole(
-            Roles.ChiefProjectManager))
+        if (request.Status.HasValue)
         {
-            return await _repository.GetAllAsync();
+            query = query.Where(x =>
+                x.Status == request.Status.Value);
         }
 
-        if (_userService.IsInRole(
-            Roles.ProjectManager))
+        if (request.Priority.HasValue)
         {
-            return await _repository
-                .GetByManagerAsync(userId);
+            query = query.Where(x =>
+                x.Priority == request.Priority.Value);
         }
 
-        return await _repository
-            .GetByMemberAsync(userId);
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            query = query.Where(x =>
+                x.Title.Contains(request.Search));
+        }
+
+        query = query
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize);
+
+        return query.Select(x => new GetProjectsListResponse
+        {
+            Id = x.Id,
+            Title = x.Title,
+            CustomerCompany = x.CustomerCompany,
+            ExecutorCompany = x.ExecutorCompany,
+            Status = x.Status.ToString(),
+            Priority = x.Priority.ToString()
+        }).ToList();
     }
 }

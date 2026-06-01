@@ -11,4 +11,6 @@ public class GetWorkItemsResponse
     public int ProjectId { get; set; }
 
     public string Status { get; set; } = null!;
+
+    public string Priority { get; set; } = null!;
 }

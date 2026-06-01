@@ -73,4 +73,9 @@ public class ProjectRepository : IProjectRepository
 
         await _context.SaveChangesAsync();
     }
+
+    public IQueryable<Project> Query()
+    {
+        return _context.Projects;
+    }
 }

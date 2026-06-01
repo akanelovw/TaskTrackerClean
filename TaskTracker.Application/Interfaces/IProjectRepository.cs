@@ -19,4 +19,6 @@ public interface IProjectRepository
     Task UpdateAsync(Project project);
 
     Task DeleteAsync(Project project);
+
+    IQueryable<Project> Query();
 }

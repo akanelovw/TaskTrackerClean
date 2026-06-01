@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TaskTracker.Api.Common;
 using TaskTracker.Application.Documents.AddDocument;
 using TaskTracker.Application.Documents.DeleteDocument;
 using TaskTracker.Application.Documents.GetProjectDocuments;
@@ -23,26 +24,28 @@ public class DocumentsController : ControllerBase
         _get = get;
     }
 
+    // ================= GET BY PROJECT =================
     [HttpGet("project/{projectId}")]
     public async Task<IActionResult> GetByProject(int projectId)
     {
-        var result = await _get.Execute(
-            new GetProjectDocumentsRequest
-            {
-                ProjectId = projectId
-            });
+        var result = await _get.Execute(new GetProjectDocumentsRequest
+        {
+            ProjectId = projectId
+        });
 
-        return Ok(result);
+        return Ok(ApiResponse.Ok(result));
     }
 
+    // ================= ADD =================
     [HttpPost]
     public async Task<IActionResult> Add([FromForm] AddDocumentRequest request)
     {
         await _add.Execute(request);
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Document uploaded"));
     }
 
+    // ================= DELETE =================
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -51,6 +54,6 @@ public class DocumentsController : ControllerBase
             DocumentId = id
         });
 
-        return Ok();
+        return Ok(ApiResponse.Ok("Document deleted"));
     }
 }

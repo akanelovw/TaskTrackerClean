@@ -1,5 +1,5 @@
-﻿using System.Net;
-using TaskTracker.Application.Common.Exceptions;
+﻿using TaskTracker.Application.Common.Exceptions;
+using TaskTracker.Api.Common;
 
 namespace TaskTracker.Api.Middleware;
 
@@ -24,22 +24,27 @@ public class ExceptionMiddleware
         }
     }
 
-    private static Task HandleException(HttpContext context, Exception ex)
+    private static async Task HandleException(HttpContext context, Exception ex)
     {
         context.Response.ContentType = "application/json";
 
         context.Response.StatusCode = ex switch
         {
-            NotFoundException => (int)HttpStatusCode.NotFound,
-            ForbiddenException => (int)HttpStatusCode.Forbidden,
-            ValidationException => (int)HttpStatusCode.BadRequest,
-            UnauthorizedException => (int)HttpStatusCode.Unauthorized,
-            _ => (int)HttpStatusCode.InternalServerError
+            BadRequestException => 400,
+            NotFoundException => 404,
+            ForbiddenException => 403,
+            UnauthorizedException => 401,
+            _ => 500
         };
 
-        return context.Response.WriteAsJsonAsync(new
+        var response = new ApiResponse<object>
         {
-            error = ex.Message
-        });
+            Success = false,
+            Message = ex.Message,
+            Errors = new List<ApiError>(),
+            Data = null
+        };
+
+        await context.Response.WriteAsJsonAsync(response);
     }
 }

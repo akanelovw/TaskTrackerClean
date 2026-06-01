@@ -50,7 +50,7 @@ public class CreateWorkItemUseCase
             if (!project.HasMember(
                 request.AssignedUserId))
             {
-                throw new ValidationException(
+                throw new BadRequestException(
                     "User is not project member");
             }
         }

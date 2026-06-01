@@ -19,67 +19,74 @@ public class GetWorkItemsUseCase
         _userService = userService;
     }
 
-    public async Task<List<GetWorkItemsResponse>> Execute()
+    public async Task<List<GetWorkItemsResponse>> Execute(
+        GetWorkItemsRequest request)
     {
         var userId = _userService.GetCurrentUserId();
+
+        var query = _workItemRepository.Query();
 
         var isAdmin =
             _userService.IsInRole(Roles.Admin) ||
             _userService.IsInRole(Roles.ChiefProjectManager);
 
-        var result = new List<GetWorkItemsResponse>();
-
-        if (isAdmin)
+        if (!isAdmin)
         {
-            var all = await _workItemRepository.GetAllAsync();
-
-            return all.Select(x => new GetWorkItemsResponse
+            if (_userService.IsInRole(Roles.ProjectManager))
             {
-                Id = x.Id,
-                Title = x.Title,
-                AssignedUserId = x.AssignedUserId,
-                ProjectId = x.ProjectId,
-                Status = x.Status.ToString()
-            }).ToList();
-        }
+                var projects =
+                    await _projectRepository
+                        .GetByManagerAsync(userId);
 
-        if (_userService.IsInRole(Roles.ProjectManager))
-        {
-            var projects =
-                await _projectRepository.GetByManagerAsync(userId);
+                var projectIds =
+                    projects.Select(x => x.Id).ToList();
 
-            var projectIds = projects.Select(p => p.Id).ToList();
-
-            var allTasks = new List<GetWorkItemsResponse>();
-
-            foreach (var projectId in projectIds)
-            {
-                var items =
-                    await _workItemRepository.GetByProjectIdAsync(projectId);
-
-                allTasks.AddRange(items.Select(x => new GetWorkItemsResponse
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    AssignedUserId = x.AssignedUserId,
-                    ProjectId = x.ProjectId,
-                    Status = x.Status.ToString()
-                }));
+                query = query.Where(x =>
+                    projectIds.Contains(x.ProjectId));
             }
-
-            return allTasks;
+            else
+            {
+                query = query.Where(x =>
+                    x.AssignedUserId == userId);
+            }
         }
 
-        var myTasks =
-            await _workItemRepository.GetByAssigneeAsync(userId);
+        if (request.Status.HasValue)
+        {
+            query = query.Where(x =>
+                x.Status == request.Status.Value);
+        }
 
-        return myTasks.Select(x => new GetWorkItemsResponse
+        if (request.ProjectId.HasValue)
+        {
+            query = query.Where(x =>
+                x.ProjectId == request.ProjectId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.AssignedUserId))
+        {
+            query = query.Where(x =>
+                x.AssignedUserId == request.AssignedUserId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            query = query.Where(x =>
+                x.Title.Contains(request.Search));
+        }
+
+        query = query
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize);
+
+        return query.Select(x => new GetWorkItemsResponse
         {
             Id = x.Id,
             Title = x.Title,
             AssignedUserId = x.AssignedUserId,
             ProjectId = x.ProjectId,
-            Status = x.Status.ToString()
+            Status = x.Status.ToString(),
+            Priority = x.Priority.ToString()
         }).ToList();
     }
 }
