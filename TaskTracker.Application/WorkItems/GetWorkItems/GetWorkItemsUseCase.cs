@@ -1,4 +1,5 @@
 ﻿using TaskTracker.Application.Common;
+using TaskTracker.Application.Common.Mappings;
 using TaskTracker.Application.Interfaces;
 
 namespace TaskTracker.Application.WorkItems.GetWorkItems;
@@ -34,12 +35,10 @@ public class GetWorkItemsUseCase
         {
             if (_userService.IsInRole(Roles.ProjectManager))
             {
-                var projects =
-                    await _projectRepository
-                        .GetByManagerAsync(userId);
+                var projects = await _projectRepository
+                    .GetByManagerAsync(userId);
 
-                var projectIds =
-                    projects.Select(x => x.Id).ToList();
+                var projectIds = projects.Select(x => x.Id).ToList();
 
                 query = query.Where(x =>
                     projectIds.Contains(x.ProjectId));
@@ -79,14 +78,8 @@ public class GetWorkItemsUseCase
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize);
 
-        return query.Select(x => new GetWorkItemsResponse
-        {
-            Id = x.Id,
-            Title = x.Title,
-            AssignedUserId = x.AssignedUserId,
-            ProjectId = x.ProjectId,
-            Status = x.Status.ToString(),
-            Priority = x.Priority.ToString()
-        }).ToList();
+        return query
+            .Select(WorkItemMapping.ToResponse)
+            .ToList();
     }
 }

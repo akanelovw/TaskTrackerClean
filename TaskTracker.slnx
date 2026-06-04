@@ -4,8 +4,17 @@
     <BuildType Name="Release" />
     <BuildType Name="Test" />
   </Configurations>
+  <Project Path="TaskTracker.Api.IntegrationTests/TaskTracker.Api.IntegrationTests.csproj" Id="1fbbef6c-59b9-4b79-b088-e925c0a784da">
+    <BuildType Solution="Test|*" Project="Debug" />
+  </Project>
+  <Project Path="TaskTracker.Application.Tests/TaskTracker.Application.Tests.csproj" Id="4daabdc2-90fd-44aa-b2c1-0d1f22bb026c">
+    <BuildType Solution="Test|*" Project="Debug" />
+  </Project>
   <Project Path="TaskTracker.Application/TaskTracker.Application.csproj">
     <Build Solution="Test|*" Project="false" />
+  </Project>
+  <Project Path="TaskTracker.Domain.Tests/TaskTracker.Domain.Tests.csproj" Id="2193569d-1e38-4cc0-8284-a1ce40166b46">
+    <BuildType Solution="Test|*" Project="Debug" />
   </Project>
   <Project Path="TaskTracker.Domain/TaskTracker.Domain.csproj">
     <BuildType Solution="Test|*" Project="Release" />

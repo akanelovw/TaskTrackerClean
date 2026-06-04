@@ -76,6 +76,8 @@ public class ProjectRepository : IProjectRepository
 
     public IQueryable<Project> Query()
     {
-        return _context.Projects;
+        return _context.Projects
+            .Include(x => x.Members)
+            .Include(x => x.Documents);
     }
 }

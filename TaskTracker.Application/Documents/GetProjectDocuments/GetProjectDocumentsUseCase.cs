@@ -1,5 +1,6 @@
 ﻿using TaskTracker.Application.Common;
 using TaskTracker.Application.Common.Exceptions;
+using TaskTracker.Application.Common.Mappings;
 using TaskTracker.Application.Interfaces;
 
 namespace TaskTracker.Application.Documents.GetProjectDocuments;
@@ -26,8 +27,7 @@ public class GetProjectDocumentsUseCase
         if (project == null)
             throw new NotFoundException("Project not found");
 
-        var currentUserId =
-            _userService.GetCurrentUserId();
+        var currentUserId = _userService.GetCurrentUserId();
 
         var isAdmin =
             _userService.IsInRole(Roles.Admin) ||
@@ -48,12 +48,7 @@ public class GetProjectDocumentsUseCase
         }
 
         return project.Documents
-            .Select(x => new GetProjectDocumentsResponse
-            {
-                Id = x.Id,
-                FileName = x.FileName,
-                FilePath = x.FilePath
-            })
+            .Select(DocumentMapping.ToResponse)
             .ToList();
     }
 }

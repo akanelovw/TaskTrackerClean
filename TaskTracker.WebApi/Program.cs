@@ -110,6 +110,12 @@ builder.Services.Scan(scan => scan
     .AsSelf()
     .WithScopedLifetime());
 
+// ================= IDENTITY SEEDER =================
+
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddHostedService<IdentitySeederHostedService>();
+}
 
 // ================= APP =================
 
@@ -139,21 +145,6 @@ app.UseMiddleware<ExceptionMiddleware>();
 // ================= CONTROLLERS =================
 
 app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager =
-        scope.ServiceProvider
-            .GetRequiredService<RoleManager<IdentityRole>>();
-
-    await RoleSeeder.SeedAsync(roleManager);
-
-    var userManager =
-        scope.ServiceProvider
-            .GetRequiredService<UserManager<AppUser>>();
-
-    await AdminSeeder.SeedAsync(userManager);
-}
 
 
 app.Run();

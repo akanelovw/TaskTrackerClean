@@ -24,7 +24,6 @@ public class DocumentsController : ControllerBase
         _get = get;
     }
 
-    // ================= GET BY PROJECT =================
     [HttpGet("project/{projectId}")]
     public async Task<IActionResult> GetByProject(int projectId)
     {
@@ -36,7 +35,6 @@ public class DocumentsController : ControllerBase
         return Ok(ApiResponse.Ok(result));
     }
 
-    // ================= ADD =================
     [HttpPost]
     public async Task<IActionResult> Add([FromForm] AddDocumentRequest request)
     {
@@ -45,7 +43,6 @@ public class DocumentsController : ControllerBase
         return Ok(ApiResponse.Ok("Document uploaded"));
     }
 
-    // ================= DELETE =================
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

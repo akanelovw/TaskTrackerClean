@@ -25,10 +25,12 @@ public class AuthService : IAuthService
         string password)
     {
         var user =
-            await _userManager.FindByEmailAsync(email);
+    await _userManager.FindByEmailAsync(email);
 
         if (user == null)
-            throw new UnauthorizedException("Invalid credentials");
+        {
+            throw new NotFoundException($"USER NOT FOUND: {email}");
+        }
 
         var valid =
             await _userManager.CheckPasswordAsync(
@@ -36,7 +38,11 @@ public class AuthService : IAuthService
                 password);
 
         if (!valid)
-            throw new UnauthorizedException("Invalid credentials");
+        {
+            throw new UnauthorizedException(
+                $"PASSWORD INVALID FOR USER {email}");
+        }
+
 
         var roles =
             await _userManager.GetRolesAsync(user);

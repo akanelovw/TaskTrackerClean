@@ -1,5 +1,6 @@
 ﻿using TaskTracker.Application.Common;
 using TaskTracker.Application.Common.Exceptions;
+using TaskTracker.Application.Common.Mappings;
 using TaskTracker.Application.Interfaces;
 
 namespace TaskTracker.Application.Projects.GetProjectDetails;
@@ -24,43 +25,25 @@ public class GetProjectDetailsUseCase
         if (project == null)
             throw new NotFoundException("Project not found");
 
-        var userId =
-            _userService.GetCurrentUserId();
+        var userId = _userService.GetCurrentUserId();
 
         if (_userService.IsInRole(Roles.Admin))
-            return Map(project);
+            return ProjectMapping.ToDetails(project);
 
         if (_userService.IsInRole(Roles.ChiefProjectManager))
-            return Map(project);
+            return ProjectMapping.ToDetails(project);
 
         if (_userService.IsInRole(Roles.ProjectManager))
         {
             if (project.ManagerUserId != userId)
                 throw new ForbiddenException();
 
-            return Map(project);
+            return ProjectMapping.ToDetails(project);
         }
 
         if (!project.HasMember(userId))
             throw new ForbiddenException();
 
-        return Map(project);
-    }
-
-    private static GetProjectDetailsResponse Map(
-        Domain.Entities.Project project)
-    {
-        return new GetProjectDetailsResponse
-        {
-            Id = project.Id,
-            Title = project.Title,
-            CustomerCompany = project.CustomerCompany,
-            ExecutorCompany = project.ExecutorCompany,
-            StartTime = project.StartTime,
-            EndTime = project.EndTime,
-            Priority = project.Priority.ToString(),
-            Status = project.Status.ToString(),
-            ManagerUserId = project.ManagerUserId
-        };
+        return ProjectMapping.ToDetails(project);
     }
 }

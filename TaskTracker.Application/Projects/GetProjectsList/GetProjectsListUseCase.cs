@@ -1,4 +1,5 @@
 ﻿using TaskTracker.Application.Common;
+using TaskTracker.Application.Common.Mappings;
 using TaskTracker.Application.Interfaces;
 
 namespace TaskTracker.Application.Projects.GetProjectsList;
@@ -63,14 +64,8 @@ public class GetProjectsListUseCase
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize);
 
-        return query.Select(x => new GetProjectsListResponse
-        {
-            Id = x.Id,
-            Title = x.Title,
-            CustomerCompany = x.CustomerCompany,
-            ExecutorCompany = x.ExecutorCompany,
-            Status = x.Status.ToString(),
-            Priority = x.Priority.ToString()
-        }).ToList();
+        return query
+            .Select(ProjectMapping.ToList)
+            .ToList();
     }
 }
