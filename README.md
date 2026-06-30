@@ -203,6 +203,8 @@ docker compose up -d --build
 > Если SDK обновился до новой feature-band версии и появляются ошибки про несовместимые версии рантайма пакетов (`NU1102` для `Microsoft.NETCore.App.Runtime.*`), выполните `dotnet workload update`, затем `dotnet workload install maui-windows android ios maccatalyst`, и при необходимости очистите кэш сборки: `find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +`.
 
 ```bash
+dotnet restore TaskTracker.Maui/TaskTracker.Maui.csproj -p:TargetFrameworks=net10.0-windows10.0.19041.0
+
 dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
   -f net10.0-windows10.0.19041.0 \
   -c Release \
@@ -210,20 +212,13 @@ dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
   -p:WindowsPackageType=None \
   -p:SelfContained=true \
   -p:RuntimeIdentifier=win-x64 \
+  --no-restore \
   -o ./publish/windows
 ```
 
 > Параметр `-p:TargetFrameworks=net10.0-windows10.0.19041.0` обязателен — проект мультитаргетный (Android/iOS/MacCatalyst/Windows), и без него restore попытается резолвить зависимости сразу для всех платформ, что приводит к ошибкам поиска несуществующих пакетов.
 
 Готовый `.exe` будет в папке `publish/windows`.
-
-Для релиза на GitHub заархивируйте папку:
-
-```powershell
-Compress-Archive -Path ./publish/windows/* -DestinationPath TaskTracker-win-x64.zip
-```
-
-Загрузите `TaskTracker-win-x64.zip` в GitHub Releases — пользователи смогут скачать и запустить без каких-либо установок.
 
 ### Mobile-клиент (Android)
 
@@ -247,6 +242,7 @@ dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
 
 ## Структура проекта
 
+```text
 tasktracker/
 ├── TaskTracker.WebApi/             # ASP.NET Core Web API
 ├── TaskTracker.Application/        # Use cases, интерфейсы
@@ -257,6 +253,7 @@ tasktracker/
 ├── Caddyfile
 ├── .env.example
 └── README.md
+```
 
 ---
 
@@ -272,34 +269,3 @@ tasktracker/
 | `DOMAIN`                 | Домен для автоматического HTTPS через Let's Encrypt (необязательно)      |
 | `ACME_EMAIL`             | Email для регистрации сертификата Let's Encrypt (необязательно)          |
 | `API_PORT`               | Порт, на котором публикуется API (по умолчанию 80)                       |
-
----
-
-## Возможные проблемы
-
-**Контейнер `db` не запускается**
-Проверьте, что `DB_PASSWORD` соответствует требованиям сложности MS SQL Server (заглавные + строчные буквы + цифры + спецсимволы).
-
-**Контейнер `api` не может подключиться к БД**
-БД стартует дольше API. Подождите 30–60 секунд и проверьте `docker compose logs db`. Если проблема повторяется — `docker compose restart api`.
-
-**Не получается HTTPS-сертификат**
-Убедитесь, что домен действительно указывает на IP сервера (`nslookup ваш-домен`), и что порты 80/443 открыты во внешнем firewall. Caddy не сможет получить сертификат, если порт 80 недоступен снаружи.
-
-**`TaskTracker.Maui.exe` не запускается**
-Убедитесь, что Windows 10 обновлена до версии 19041 (May 2020 Update) или новее.
-
-**При сборке Dockerfile появляется `NETSDK1045: does not support targeting .NET 10.0`**
-В `Dockerfile` используются образы под устаревшую версию SDK. Убедитесь, что в `FROM`-строках указано `mcr.microsoft.com/dotnet/sdk:10.0` и `mcr.microsoft.com/dotnet/aspnet:10.0`, а не `9.0`.
-
-**При сборке Dockerfile ошибка `Unable to find fallback package folder ... NuGetPackages`**
-Это означает, что папки `bin`/`obj` с Windows-путями попали в Docker build context. Создайте/проверьте `.dockerignore` в корне репозитория со строками `**/bin/`, `**/obj/`, `**/.vs/`, и пересоберите без кэша: `docker compose build --no-cache`.
-
-**MAUI-приложение крашится на старте с `WinRT.Runtime` / `InvalidOperationException: Operation is not valid due to the current state of the object`**
-Причина — вызов MAUI Essentials API (`FileSystem.OpenAppPackageFileAsync`, `Preferences`) внутри `MauiProgram.CreateMauiApp()` до полной инициализации платформы. Используйте чтение `appsettings.json` через `Assembly.GetManifestResourceStream` (`EmbeddedResource` вместо `MauiAsset`), а доступ к `Preferences` на мобильных платформах выполняйте лениво — например, через `DelegatingHandler`, срабатывающий уже после запуска приложения, а не при старте `MauiProgram`.
-
-**Клиент не подключается к API**
-- Проверьте, что Docker-контейнеры работают: `docker compose ps`.
-- На десктопе проверьте `config.json` рядом с `.exe` — указан ли там правильный адрес.
-- На мобильном устройстве проверьте экран **Настройки** — указан ли правильный адрес, и используется ли реальный IP сервера, а не `localhost`.
-- Убедитесь, что устройство (телефон/ПК) и сервер находятся в одной сети, либо что сервер доступен публично по домену с HTTPS.
