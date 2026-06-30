@@ -4,8 +4,8 @@
 
 ## Стек
 
-- **Backend:** ASP.NET Core 9, Entity Framework Core, MS SQL Server, JWT
-- **Desktop/Mobile-клиент:** .NET MAUI (Windows, Android, iOS, macOS)
+- **Backend:** ASP.NET Core 10, Entity Framework Core, MS SQL Server, JWT
+- **Desktop/Mobile-клиент:** .NET MAUI 10 (Windows, Android, iOS, macOS)
 - **Инфраструктура:** Docker, Docker Compose, Caddy (HTTPS reverse-proxy)
 
 ---
@@ -49,7 +49,7 @@ API_PORT=8080
 
 #### Хотите подключить свою базу данных вместо встроенной?
 
-Просто замените всю строку `DB_CONNECTION_STRING` на адрес вашей БД, например:
+Замените всю строку `DB_CONNECTION_STRING` на адрес вашей БД:
 
 ```env
 DB_CONNECTION_STRING=Server=my-external-db.com,1433;Database=TaskTrackerDb;User Id=myuser;Password=MyPassword;TrustServerCertificate=True
@@ -138,8 +138,8 @@ Caddy автоматически получит SSL-сертификат от Le
 
 Используйте учётные данные из вашего `.env`:
 
-| Поле     | Значение                       |
-|----------|---------------------------------|
+| Поле     | Значение                            |
+|----------|--------------------------------------|
 | Email    | значение `ADMIN_EMAIL` из `.env`    |
 | Password | значение `ADMIN_PASSWORD` из `.env` |
 
@@ -196,19 +196,24 @@ docker compose up -d --build
 ### Desktop-клиент (Windows)
 
 **Требования:**
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10)
 - Windows 10 версии 19041 или новее
-- Рабочая нагрузка `.NET MAUI` (`dotnet workload install maui`)
+- Рабочая нагрузка `.NET MAUI` (`dotnet workload install maui-windows`)
+
+> Если SDK обновился до новой feature-band версии и появляются ошибки про несовместимые версии рантайма пакетов (`NU1102` для `Microsoft.NETCore.App.Runtime.*`), выполните `dotnet workload update`, затем `dotnet workload install maui-windows android ios maccatalyst`, и при необходимости очистите кэш сборки: `find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +`.
 
 ```bash
 dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
-  -f net9.0-windows10.0.19041.0 \
+  -f net10.0-windows10.0.19041.0 \
   -c Release \
+  -p:TargetFrameworks=net10.0-windows10.0.19041.0 \
   -p:WindowsPackageType=None \
   -p:SelfContained=true \
   -p:RuntimeIdentifier=win-x64 \
   -o ./publish/windows
 ```
+
+> Параметр `-p:TargetFrameworks=net10.0-windows10.0.19041.0` обязателен — проект мультитаргетный (Android/iOS/MacCatalyst/Windows), и без него restore попытается резолвить зависимости сразу для всех платформ, что приводит к ошибкам поиска несуществующих пакетов.
 
 Готовый `.exe` будет в папке `publish/windows`.
 
@@ -224,7 +229,7 @@ Compress-Archive -Path ./publish/windows/* -DestinationPath TaskTracker-win-x64.
 
 ```bash
 dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
-  -f net9.0-android \
+  -f net10.0-android \
   -c Release \
   -o ./publish/android
 ```
@@ -233,7 +238,7 @@ dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
 
 ```bash
 dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
-  -f net9.0-ios \
+  -f net10.0-ios \
   -c Release \
   -o ./publish/ios
 ```
@@ -241,12 +246,13 @@ dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
 ---
 
 ## Структура проекта
+
 tasktracker/
-├── TaskTracker.Api/             # ASP.NET Core Web API
-├── TaskTracker.Application/     # Use cases, интерфейсы
-├── TaskTracker.Domain/          # Доменные сущности
-├── TaskTracker.Infrastructure/  # EF Core, репозитории, сервисы
-├── TaskTracker.Maui/            # .NET MAUI клиент (Windows/Android/iOS)
+├── TaskTracker.WebApi/             # ASP.NET Core Web API
+├── TaskTracker.Application/        # Use cases, интерфейсы
+├── TaskTracker.Domain/             # Доменные сущности
+├── TaskTracker.Infrastructure/     # EF Core, репозитории, сервисы
+├── TaskTracker.Maui/               # .NET MAUI клиент (Windows/Android/iOS)
 ├── docker-compose.yml
 ├── Caddyfile
 ├── .env.example
@@ -256,8 +262,8 @@ tasktracker/
 
 ## Переменные окружения
 
-| Переменная               | Описание                                                                 |
-|--------------------------|--------------------------------------------------------------------------|
+| Переменная               | Описание                                                                  |
+|---------------------------|----------------------------------------------------------------------------|
 | `DB_CONNECTION_STRING`   | Полная строка подключения к БД (своя или встроенная в docker-compose)    |
 | `DB_PASSWORD`            | Пароль SA для встроенного контейнера MS SQL Server                       |
 | `JWT_KEY`                | Секретный ключ для подписи JWT (мин. 32 символа)                         |
@@ -282,6 +288,15 @@ tasktracker/
 
 **`TaskTracker.Maui.exe` не запускается**
 Убедитесь, что Windows 10 обновлена до версии 19041 (May 2020 Update) или новее.
+
+**При сборке Dockerfile появляется `NETSDK1045: does not support targeting .NET 10.0`**
+В `Dockerfile` используются образы под устаревшую версию SDK. Убедитесь, что в `FROM`-строках указано `mcr.microsoft.com/dotnet/sdk:10.0` и `mcr.microsoft.com/dotnet/aspnet:10.0`, а не `9.0`.
+
+**При сборке Dockerfile ошибка `Unable to find fallback package folder ... NuGetPackages`**
+Это означает, что папки `bin`/`obj` с Windows-путями попали в Docker build context. Создайте/проверьте `.dockerignore` в корне репозитория со строками `**/bin/`, `**/obj/`, `**/.vs/`, и пересоберите без кэша: `docker compose build --no-cache`.
+
+**MAUI-приложение крашится на старте с `WinRT.Runtime` / `InvalidOperationException: Operation is not valid due to the current state of the object`**
+Причина — вызов MAUI Essentials API (`FileSystem.OpenAppPackageFileAsync`, `Preferences`) внутри `MauiProgram.CreateMauiApp()` до полной инициализации платформы. Используйте чтение `appsettings.json` через `Assembly.GetManifestResourceStream` (`EmbeddedResource` вместо `MauiAsset`), а доступ к `Preferences` на мобильных платформах выполняйте лениво — например, через `DelegatingHandler`, срабатывающий уже после запуска приложения, а не при старте `MauiProgram`.
 
 **Клиент не подключается к API**
 - Проверьте, что Docker-контейнеры работают: `docker compose ps`.
