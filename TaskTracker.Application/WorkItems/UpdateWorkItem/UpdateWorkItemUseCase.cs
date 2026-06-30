@@ -51,7 +51,6 @@ public class UpdateWorkItemUseCase
 
         item.UpdateTitle(request.Title);
         item.UpdateComment(request.Comment);
-        item.ChangePriority(request.Priority);
 
         await _repo.UpdateAsync(item);
     }

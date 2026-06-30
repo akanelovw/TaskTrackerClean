@@ -8,29 +8,30 @@ namespace TaskTracker.Application.Documents.AddDocument;
 public class AddDocumentUseCase
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IDocumentRepository _documentRepository;
     private readonly IFileStorageService _fileStorageService;
     private readonly IUserService _userService;
 
     public AddDocumentUseCase(
         IProjectRepository projectRepository,
+        IDocumentRepository documentRepository,
         IFileStorageService fileStorageService,
         IUserService userService)
     {
         _projectRepository = projectRepository;
+        _documentRepository = documentRepository;
         _fileStorageService = fileStorageService;
         _userService = userService;
     }
 
     public async Task Execute(AddDocumentRequest request)
     {
-        var project =
-            await _projectRepository.GetByIdAsync(request.ProjectId);
+        var project = await _projectRepository.GetByIdAsync(request.ProjectId);
 
         if (project == null)
             throw new NotFoundException("Project not found");
 
-        var currentUserId =
-            _userService.GetCurrentUserId();
+        var currentUserId = _userService.GetCurrentUserId();
 
         var isAdmin =
             _userService.IsInRole(Roles.Admin) ||
@@ -60,6 +61,6 @@ public class AddDocumentUseCase
             path,
             request.ProjectId);
 
-        await _projectRepository.UpdateAsync(project);
+        await _documentRepository.AddAsync(document);
     }
 }

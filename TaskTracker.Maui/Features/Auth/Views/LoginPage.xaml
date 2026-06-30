@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="TaskTracker.Maui.Features.Auth.Views.LoginPage"
+    BackgroundColor="#0B0F17">
+
+    <Grid Padding="24">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border
+            Grid.Row="1"
+            StrokeThickness="1"
+            Stroke="#1F2937"
+            BackgroundColor="#111827"
+            StrokeShape="RoundRectangle 22"
+            Padding="28"
+            HorizontalOptions="Center"
+            WidthRequest="380">
+
+            <VerticalStackLayout Spacing="18">
+
+                <Border
+                    WidthRequest="56"
+                    HeightRequest="56"
+                    BackgroundColor="#4F46E5"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 16"
+                    HorizontalOptions="Center">
+
+                    <Label
+                        Text="✓"
+                        FontSize="26"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+
+                </Border>
+
+                <VerticalStackLayout Spacing="4">
+
+                    <Label
+                        Text="Welcome back"
+                        FontSize="26"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalOptions="Center" />
+
+                    <Label
+                        Text="Login to your account"
+                        FontSize="13"
+                        TextColor="#9CA3AF"
+                        HorizontalOptions="Center" />
+
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="12">
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Email" TextColor="#9CA3AF" FontSize="13" />
+                        <Entry
+                            Text="{Binding Email}"
+                            Placeholder="you@example.com"
+                            Keyboard="Email"
+                            IsSpellCheckEnabled="False"
+                            IsTextPredictionEnabled="False"
+                            TextColor="White"
+                            PlaceholderColor="#6B7280"
+                            BackgroundColor="#1F2937"
+                            HeightRequest="46"
+                            ClearButtonVisibility="WhileEditing"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Password" TextColor="#9CA3AF" FontSize="13" />
+                        <Entry
+                            Text="{Binding Password}"
+                            Placeholder="••••••••"
+                            IsPassword="True"
+                            TextColor="White"
+                            PlaceholderColor="#6B7280"
+                            BackgroundColor="#1F2937"
+                            HeightRequest="46"/>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <Border
+                    BackgroundColor="#7F1D1D"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="10,8"
+                    IsVisible="{Binding Error, Converter={StaticResource StringNotEmptyToBoolConverter}}">
+
+                    <Label
+                        Text="{Binding Error}"
+                        TextColor="#FCA5A5"
+                        FontSize="12" />
+
+                </Border>
+
+                <Button
+                    Text="Login"
+                    Command="{Binding LoginCommand}"
+                    BackgroundColor="#4F46E5"
+                    TextColor="White"
+                    CornerRadius="12"
+                    HeightRequest="48"
+                    FontAttributes="Bold"/>
+
+            </VerticalStackLayout>
+
+        </Border>
+
+    </Grid>
+
+</ContentPage>

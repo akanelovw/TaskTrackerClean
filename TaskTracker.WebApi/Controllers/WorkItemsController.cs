@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Application.WorkItems.AssignUser;
 using TaskTracker.Application.WorkItems.ChangeStatus;
+using TaskTracker.Application.WorkItems.ChangePriority;
 using TaskTracker.Application.WorkItems.CreateWorkItem;
 using TaskTracker.Application.WorkItems.DeleteWorkItem;
 using TaskTracker.Application.WorkItems.GetWorkItems;
@@ -17,6 +18,7 @@ public class WorkItemsController : ControllerBase
 {
     private readonly CreateWorkItemUseCase _create;
     private readonly ChangeWorkItemStatusUseCase _changeStatus;
+    private readonly ChangeWorkItemPriorityUseCase _changePriority;
     private readonly AssignUserUseCase _assign;
     private readonly UpdateWorkItemUseCase _update;
     private readonly DeleteWorkItemUseCase _delete;
@@ -25,6 +27,7 @@ public class WorkItemsController : ControllerBase
     public WorkItemsController(
         CreateWorkItemUseCase create,
         ChangeWorkItemStatusUseCase changeStatus,
+        ChangeWorkItemPriorityUseCase changePriority,
         AssignUserUseCase assign,
         UpdateWorkItemUseCase update,
         DeleteWorkItemUseCase delete,
@@ -32,6 +35,7 @@ public class WorkItemsController : ControllerBase
     {
         _create = create;
         _changeStatus = changeStatus;
+        _changePriority = changePriority;
         _assign = assign;
         _update = update;
         _delete = delete;
@@ -76,6 +80,17 @@ public class WorkItemsController : ControllerBase
         await _changeStatus.Execute(request);
 
         return Ok(ApiResponse.Ok("Status updated"));
+    }
+
+    // ================= CHANGE PRIORITY =================
+    [HttpPut("{id}/priority")]
+    public async Task<IActionResult> ChangePriority(int id, ChangeWorkItemPriorityRequest request)
+    {
+        request.WorkItemId = id;
+
+        await _changePriority.Execute(request);
+
+        return Ok(ApiResponse.Ok("Priority updated"));
     }
 
     // ================= ASSIGN USER =================

@@ -1,0 +1,12 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TaskTracker.Maui.Features.Settings.SettingsPage"
+             Title="Настройки сервера">
+    <VerticalStackLayout Padding="20" Spacing="15">
+        <Label Text="Адрес сервера (API)" FontAttributes="Bold" />
+        <Entry x:Name="ApiUrlEntry" Placeholder="http://192.168.1.10:8080/" />
+        <Button Text="Сохранить" Clicked="OnSaveClicked" />
+        <Label Text="После сохранения перезапустите приложение"
+               FontSize="12" TextColor="Gray" />
+    </VerticalStackLayout>
+</ContentPage>

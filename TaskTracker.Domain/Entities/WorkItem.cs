@@ -24,8 +24,10 @@ public class WorkItem
 
     public WorkItem(
         string title,
+        string? comment,
         string createdByUserId,
         int projectId,
+        WorkItemStatus status,
         WorkItemPriority priority)
     {
         if (string.IsNullOrWhiteSpace(title))
@@ -38,6 +40,7 @@ public class WorkItem
             throw new ArgumentException("ProjectId is invalid");
 
         Title = title;
+        Comment = comment;
         CreatedByUserId = createdByUserId;
         ProjectId = projectId;
         Priority = priority;

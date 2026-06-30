@@ -7,15 +7,18 @@ namespace TaskTracker.Application.Documents.DeleteDocument;
 public class DeleteDocumentUseCase
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IDocumentRepository _documentRepository;
     private readonly IFileStorageService _fileStorageService;
     private readonly IUserService _userService;
 
     public DeleteDocumentUseCase(
         IProjectRepository projectRepository,
+        IDocumentRepository documentRepository,
         IFileStorageService fileStorageService,
         IUserService userService)
     {
         _projectRepository = projectRepository;
+        _documentRepository = documentRepository;
         _fileStorageService = fileStorageService;
         _userService = userService;
     }
@@ -44,16 +47,14 @@ public class DeleteDocumentUseCase
                 throw new ForbiddenException();
         }
 
-        var document = project.Documents
-            .FirstOrDefault(x => x.Id == request.DocumentId);
+        var document =
+            await _documentRepository.GetByIdAsync(request.DocumentId);
 
         if (document == null)
             throw new NotFoundException("Document not found");
 
         _fileStorageService.DeleteFile(document.FilePath);
 
-        project.RemoveDocument(document);
-
-        await _projectRepository.UpdateAsync(project);
+        await _documentRepository.DeleteAsync(document);
     }
 }

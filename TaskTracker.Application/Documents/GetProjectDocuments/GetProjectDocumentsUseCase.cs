@@ -8,26 +8,30 @@ namespace TaskTracker.Application.Documents.GetProjectDocuments;
 public class GetProjectDocumentsUseCase
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IDocumentRepository _documentRepository;
     private readonly IUserService _userService;
 
     public GetProjectDocumentsUseCase(
         IProjectRepository projectRepository,
+        IDocumentRepository documentRepository,
         IUserService userService)
     {
         _projectRepository = projectRepository;
+        _documentRepository = documentRepository;
         _userService = userService;
     }
 
     public async Task<List<GetProjectDocumentsResponse>> Execute(
         GetProjectDocumentsRequest request)
     {
-        var project = await _projectRepository
-            .GetByIdAsync(request.ProjectId);
+        var project =
+            await _projectRepository.GetByIdAsync(request.ProjectId);
 
         if (project == null)
             throw new NotFoundException("Project not found");
 
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId =
+            _userService.GetCurrentUserId();
 
         var isAdmin =
             _userService.IsInRole(Roles.Admin) ||
@@ -47,7 +51,10 @@ public class GetProjectDocumentsUseCase
             }
         }
 
-        return project.Documents
+        var documents =
+            await _documentRepository.GetByProjectIdAsync(request.ProjectId);
+
+        return documents
             .Select(DocumentMapping.ToResponse)
             .ToList();
     }

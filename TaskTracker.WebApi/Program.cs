@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,45 +18,44 @@ using TaskTracker.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // ================= CONTROLLERS =================
-
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();
 });
 
 // ================= VALIDATORS =================
-
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // ================= OPENAPI =================
-
-builder.Services.AddOpenApi();
-
-
-// ================= SCALAR UI =================
-
 builder.Services.AddEndpointsApiExplorer();
 
-// ================= DATABASE =================
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 
+// ================= DATABASE =================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("Default")));
 
-
 // ================= IDENTITY =================
-
 builder.Services
     .AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
 // ================= JWT =================
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key is not set");
 
 builder.Services
-    .AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -63,9 +63,9 @@ builder.Services
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey)),
 
             RoleClaimType = ClaimTypes.Role,
             NameClaimType = ClaimTypes.NameIdentifier
@@ -75,34 +75,22 @@ builder.Services
 builder.Services.AddAuthorization();
 
 // ================= HTTP CONTEXT =================
-
 builder.Services.AddHttpContextAccessor();
 
-
 // ================= REPOSITORIES =================
-
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
-
 builder.Services.AddScoped<IWorkItemRepository, WorkItemRepository>();
-
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
 // ================= SERVICES =================
-
 builder.Services.AddScoped<IUserService, UserService>();
-
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
-
 builder.Services.AddScoped<IUserRoleService, UserRoleService>();
-
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
-
 builder.Services.AddScoped<IAuthService, AuthService>();
-
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 
-
-// ================= USE CASES (SCRUTOR) =================
-
+// ================= USE CASES =================
 builder.Services.Scan(scan => scan
     .FromAssemblyOf<IApplicationMarker>()
     .AddClasses(classes => classes.Where(type =>
@@ -110,41 +98,45 @@ builder.Services.Scan(scan => scan
     .AsSelf()
     .WithScopedLifetime());
 
-// ================= IDENTITY SEEDER =================
+// ================= ADMIN SEED OPTIONS =================
+builder.Services
+    .AddOptions<AdminUserOptions>()
+    .Bind(builder.Configuration.GetSection(AdminUserOptions.SectionName))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Email), "Admin:Email is not set")
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Password), "Admin:Password is not set")
+    .ValidateOnStart();
 
+// ================= SEEDER =================
 if (!builder.Environment.IsEnvironment("Testing"))
 {
     builder.Services.AddHostedService<IdentitySeederHostedService>();
 }
 
-// ================= APP =================
-
 var app = builder.Build();
 
-
-// ================= OPENAPI =================
-
-app.MapOpenApi();
-
-
-// ================= SCALAR =================
-
-app.MapScalarApiReference();
-
-
-// ================= AUTH =================
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-// ================= MIDDLEWARE =================
-
+// ================= MIDDLEWARE ORDER =================
 app.UseMiddleware<ExceptionMiddleware>();
 
-// ================= CONTROLLERS =================
+app.UseAuthentication();
+app.UseAuthorization();
 
+// ================= OPENAPI =================
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+
+// ================= CONTROLLERS =================
 app.MapControllers();
 
+// ================= MIGRATIONS =================
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
+    db.Database.Migrate();
+}
 
 app.Run();

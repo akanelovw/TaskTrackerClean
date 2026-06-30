@@ -8,9 +8,7 @@ namespace TaskTracker.Application.WorkItems.CreateWorkItem;
 public class CreateWorkItemUseCase
 {
     private readonly IWorkItemRepository _workItemRepository;
-
     private readonly IProjectRepository _projectRepository;
-
     private readonly IUserService _userService;
 
     public CreateWorkItemUseCase(
@@ -22,21 +20,22 @@ public class CreateWorkItemUseCase
         _userService = userService;
         _projectRepository = projectRepository;
     }
-
-    public async Task<CreateWorkItemResponse> Execute(CreateWorkItemRequest request)
+    public async Task<int> Execute(CreateWorkItemRequest request)
     {
         var userId =
             _userService.GetCurrentUserId();
+
         var project =
-            await _projectRepository
-                .GetByIdAsync(request.ProjectId);
+            await _projectRepository.GetByIdAsync(
+                request.ProjectId);
 
         if (project == null)
         {
-            throw new NotFoundException("Project not found");
+            throw new NotFoundException(
+                "Project not found");
         }
 
-        if (!_userService.IsInRole(Roles.Admin))
+        if (!_userService.IsInRole(Roles.Admin) && !_userService.IsInRole(Roles.ChiefProjectManager))
         {
             if (project.ManagerUserId != userId)
             {
@@ -57,10 +56,11 @@ public class CreateWorkItemUseCase
 
         var workItem = new WorkItem(
             request.Title,
+            request.Comment,
             userId,
             request.ProjectId,
-            request.Priority
-        );
+            request.Status,
+            request.Priority);
 
         if (!string.IsNullOrWhiteSpace(
             request.AssignedUserId))
@@ -69,16 +69,9 @@ public class CreateWorkItemUseCase
                 request.AssignedUserId);
         }
 
-        await _workItemRepository
-            .AddAsync(workItem);
+        await _workItemRepository.AddAsync(
+            workItem);
 
-        return new CreateWorkItemResponse
-        {
-            Id = workItem.Id,
-            Title = workItem.Title,
-            ProjectId = workItem.ProjectId,
-            AssignedUserId = workItem.AssignedUserId,
-            Status = workItem.Status.ToString()
-        };
+        return workItem.Id;
     }
 }

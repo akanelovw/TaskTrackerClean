@@ -1,56 +1,105 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Api.Common;
 using TaskTracker.Application.Documents.AddDocument;
 using TaskTracker.Application.Documents.DeleteDocument;
+using TaskTracker.Application.Documents.GetDocument;
 using TaskTracker.Application.Documents.GetProjectDocuments;
+using TaskTracker.WebApi.Requests;
 
 namespace TaskTracker.Api.Controllers;
 
 [ApiController]
-[Route("api/documents")]
+[Route("api/project/documents")]
+[Authorize]
 public class DocumentsController : ControllerBase
 {
-    private readonly AddDocumentUseCase _add;
-    private readonly DeleteDocumentUseCase _delete;
-    private readonly GetProjectDocumentsUseCase _get;
+    private readonly GetProjectDocumentsUseCase _getDocuments;
+    private readonly AddDocumentUseCase _addDocument;
+    private readonly DeleteDocumentUseCase _deleteDocument;
+    private readonly GetDocumentUseCase _getDocument;
 
     public DocumentsController(
-        AddDocumentUseCase add,
-        DeleteDocumentUseCase delete,
-        GetProjectDocumentsUseCase get)
+        GetProjectDocumentsUseCase getDocuments,
+        AddDocumentUseCase addDocument,
+        DeleteDocumentUseCase deleteDocument,
+        GetDocumentUseCase getDocument)
     {
-        _add = add;
-        _delete = delete;
-        _get = get;
+        _getDocuments = getDocuments;
+        _addDocument = addDocument;
+        _deleteDocument = deleteDocument;
+        _getDocument = getDocument;
     }
 
-    [HttpGet("project/{projectId}")]
+    [HttpGet("{projectId}")]
     public async Task<IActionResult> GetByProject(int projectId)
     {
-        var result = await _get.Execute(new GetProjectDocumentsRequest
-        {
-            ProjectId = projectId
-        });
+        var result = await _getDocuments.Execute(
+            new GetProjectDocumentsRequest
+            {
+                ProjectId = projectId
+            });
 
         return Ok(ApiResponse.Ok(result));
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Add([FromForm] AddDocumentRequest request)
+    [HttpPost("{projectId}")]
+    public async Task<IActionResult> Add(
+    int projectId,
+    [FromForm] UploadDocumentRequest request)
     {
-        await _add.Execute(request);
+        await using var stream = request.File.OpenReadStream();
 
-        return Ok(ApiResponse.Ok("Document uploaded"));
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        await _delete.Execute(new DeleteDocumentRequest
+        await _addDocument.Execute(new AddDocumentRequest
         {
-            DocumentId = id
+            ProjectId = projectId,
+            FileName = request.File.FileName,
+            FileStream = stream
         });
 
-        return Ok(ApiResponse.Ok("Document deleted"));
+        return Ok(ApiResponse.Ok());
     }
+
+    [HttpDelete("{projectId}/{documentId}")]
+    public async Task<IActionResult> Delete(
+        int projectId,
+        int documentId)
+    {
+        await _deleteDocument.Execute(
+            new DeleteDocumentRequest
+            {
+                ProjectId = projectId,
+                DocumentId = documentId
+            });
+
+        return Ok(ApiResponse.Ok());
+    }
+
+    [HttpGet("download/{documentId}")]
+    public async Task<IActionResult> Download(
+    int documentId)
+    {
+        var document =
+            await _getDocument.Execute(
+                new GetDocumentRequest
+                {
+                    DocumentId = documentId
+                });
+
+        var fullPath = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "wwwroot",
+            document.FilePath.TrimStart('/'));
+
+        if (!System.IO.File.Exists(fullPath))
+            return NotFound();
+
+        var stream = System.IO.File.OpenRead(fullPath);
+
+        return File(
+            stream,
+            "application/octet-stream",
+            document.FileName);
+    }
+
 }

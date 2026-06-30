@@ -10,5 +10,4 @@ public class UpdateWorkItemRequest
 
     public string? Comment { get; set; }
 
-    public WorkItemPriority Priority { get; set; }
 }

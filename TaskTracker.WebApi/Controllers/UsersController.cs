@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Api.Common;
 using TaskTracker.Application.Users.CreateUser;
 using TaskTracker.Application.Users.DeleteUser;
@@ -10,6 +11,8 @@ namespace TaskTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/users")]
+[Authorize]
+
 public class UsersController : ControllerBase
 {
     private readonly GetUsersUseCase _getUsers;

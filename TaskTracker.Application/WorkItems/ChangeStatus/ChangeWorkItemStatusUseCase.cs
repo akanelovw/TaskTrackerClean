@@ -1,7 +1,6 @@
 ﻿using TaskTracker.Application.Common;
 using TaskTracker.Application.Common.Exceptions;
 using TaskTracker.Application.Interfaces;
-using TaskTracker.Application.WorkItems.ChangeStatus;
 
 namespace TaskTracker.Application.WorkItems.ChangeStatus;
 

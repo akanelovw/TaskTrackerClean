@@ -112,9 +112,12 @@ public class UserManagementService : IUserManagementService
         return new GetUserByIdResponse
         {
             Id = user.Id,
-            Email = user.Email!,
+            UserName = user.UserName ?? "",
             FirstName = user.FirstName,
             LastName = user.LastName,
+            MiddleName = user.MiddleName ?? "",
+            FullName = user.FullName,
+            Email = user.Email!,
             Role = roles.FirstOrDefault() ?? ""
         };
     }

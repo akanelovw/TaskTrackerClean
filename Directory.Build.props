@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+</Project>

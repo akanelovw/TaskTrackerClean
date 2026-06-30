@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-
 using TaskTracker.Application.Common.Exceptions;
 using TaskTracker.Application.Interfaces;
 using TaskTracker.Infrastructure.Identity;
@@ -29,7 +28,7 @@ public class AuthService : IAuthService
 
         if (user == null)
         {
-            throw new NotFoundException($"USER NOT FOUND: {email}");
+            throw new NotFoundException($"User - {email} not found");
         }
 
         var valid =
@@ -40,7 +39,7 @@ public class AuthService : IAuthService
         if (!valid)
         {
             throw new UnauthorizedException(
-                $"PASSWORD INVALID FOR USER {email}");
+                $"Invalid password");
         }
 
 

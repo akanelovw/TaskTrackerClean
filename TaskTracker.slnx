@@ -4,6 +4,18 @@
     <BuildType Name="Release" />
     <BuildType Name="Test" />
   </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".env" />
+    <File Path=".env.example" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Caddyfile" />
+    <File Path="Directory.Build.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="TaskTracker.Api.IntegrationTests/TaskTracker.Api.IntegrationTests.csproj" Id="1fbbef6c-59b9-4b79-b088-e925c0a784da">
     <BuildType Solution="Test|*" Project="Debug" />
   </Project>
@@ -23,6 +35,10 @@
   <Project Path="TaskTracker.Infrastructure/TaskTracker.Infrastructure.csproj">
     <BuildType Solution="Test|*" Project="Release" />
     <Build Solution="Test|*" Project="false" />
+  </Project>
+  <Project Path="TaskTracker.Maui/TaskTracker.Maui.csproj" Id="f96d6989-56f5-4e13-8a6a-17e4c17ff366">
+    <BuildType Solution="Test|*" Project="Debug" />
+    <Deploy Solution="Release|*" />
   </Project>
   <Project Path="TaskTracker.WebApi/TaskTracker.WebApi.csproj" />
 </Solution>

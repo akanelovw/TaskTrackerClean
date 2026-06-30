@@ -17,7 +17,7 @@ public class CreateUserUseCase
         _userService = userService;
     }
 
-    public async Task<CreateUserResponse> Execute(CreateUserRequest request)
+    public async Task<string> Execute(CreateUserRequest request)
     {
         if (!_userService.IsInRole(Roles.Admin))
             throw new ForbiddenException();
@@ -29,9 +29,6 @@ public class CreateUserUseCase
             request.LastName,
             request.Role);
 
-        return new CreateUserResponse
-        {
-            UserId = userId
-        };
+        return userId;
     }
 }

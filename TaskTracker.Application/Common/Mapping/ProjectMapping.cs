@@ -1,8 +1,7 @@
-﻿using TaskTracker.Domain.Entities;
-using TaskTracker.Application.Projects.GetProjectsList;
+﻿using TaskTracker.Application.Projects.GetProjectsList;
 using TaskTracker.Application.Projects.GetProjectDetails;
-
-namespace TaskTracker.Application.Common.Mappings;
+using TaskTracker.Domain.Entities;
+using TaskTracker.Application.Documents.GetProjectDocuments;
 
 public static class ProjectMapping
 {
@@ -19,7 +18,11 @@ public static class ProjectMapping
         };
     }
 
-    public static GetProjectDetailsResponse ToDetails(Project project)
+    public static GetProjectDetailsResponse ToDetails(
+        Project project,
+        string? managerName,
+        List<ProjectMemberResponse> members,
+        List<GetProjectDocumentsResponse> documents)
     {
         return new GetProjectDetailsResponse
         {
@@ -31,7 +34,10 @@ public static class ProjectMapping
             EndTime = project.EndTime,
             Priority = project.Priority.ToString(),
             Status = project.Status.ToString(),
-            ManagerUserId = project.ManagerUserId
+            ManagerUserId = project.ManagerUserId,
+            ManagerName = managerName,
+            Members = members,
+            Documents = documents
         };
     }
 }

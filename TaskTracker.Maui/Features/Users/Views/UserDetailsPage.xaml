@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="TaskTracker.Maui.Features.Users.Views.UserDetailsPage"
+    BackgroundColor="#0B0F17">
+
+    <ScrollView>
+
+        <Grid Padding="20">
+            <Border
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                HorizontalOptions="Center"
+                MaximumWidthRequest="520"
+                WidthRequest="520">
+
+                <VerticalStackLayout Spacing="16">
+
+                    <Label Text="User details"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
+
+                    <Border BackgroundColor="#111827"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 18"
+                            Padding="20">
+
+                        <Grid ColumnDefinitions="64,*" ColumnSpacing="16">
+
+                            <Border
+                                WidthRequest="56"
+                                HeightRequest="56"
+                                BackgroundColor="#312E81"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 28"
+                                VerticalOptions="Center">
+
+                                <Label
+                                    Text="{Binding User.FullName, Converter={StaticResource InitialsConverter}}"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="18"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+
+                                <Label Text="{Binding User.FullName}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="White"/>
+
+                                <Label Text="{Binding User.Email}"
+                                       TextColor="#94A3B8"
+                                       FontSize="13"/>
+
+                                <Border
+                                    Padding="9,4"
+                                    BackgroundColor="#1F2937"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    HorizontalOptions="Start">
+
+                                    <Label Text="{Binding User.Role}"
+                                           TextColor="#9CA3AF"
+                                           FontSize="11" />
+
+                                </Border>
+
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                        <Button Text="✏️ Edit"
+                                BackgroundColor="#4F46E5"
+                                TextColor="White"
+                                CornerRadius="12"
+                                HeightRequest="46"
+                                Command="{Binding EditCommand}" />
+
+                        <Button Grid.Column="1"
+                                Text="🗑 Delete"
+                                BackgroundColor="#B91C1C"
+                                TextColor="White"
+                                CornerRadius="12"
+                                HeightRequest="46"
+                                Command="{Binding DeleteCommand}" />
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+        </Grid>
+
+    </ScrollView>
+
+</ContentPage>

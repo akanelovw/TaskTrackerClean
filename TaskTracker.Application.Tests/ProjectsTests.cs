@@ -14,6 +14,9 @@ public class ProjectApplicationTests
 {
     private readonly Mock<IProjectRepository> _repo = new();
     private readonly Mock<IUserService> _userService = new();
+    private readonly Mock<IUserManagementService> _users = new();
+    private readonly Mock<IDocumentRepository> _documents = new();
+
 
     private ChangeProjectStatusUseCase CreateChangeStatusSut()
         => new ChangeProjectStatusUseCase(
@@ -84,7 +87,9 @@ public class ProjectApplicationTests
     private GetProjectDetailsUseCase CreateDetailsSut()
         => new GetProjectDetailsUseCase(
             _repo.Object,
-            _userService.Object);
+            _userService.Object,
+            _users.Object,
+            _documents.Object);
 
     [Fact]
     public async Task GetDetails_Should_Return_Project()

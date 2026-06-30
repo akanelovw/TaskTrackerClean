@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="TaskTracker.Maui.Features.Users.Popups.UserPickerPopup"
+    CanBeDismissedByTappingOutsideOfPopup="False"
+    BackgroundColor="Transparent">
+
+    <Border
+        BackgroundColor="#111827"
+        StrokeThickness="1"
+        Stroke="#222B36"
+        StrokeShape="RoundRectangle 20"
+        Padding="20"
+        WidthRequest="400">
+
+        <VerticalStackLayout Spacing="14">
+
+            <Label
+                x:Name="TitleLabel"
+                Text="Select user"
+                FontSize="18"
+                FontAttributes="Bold"
+                TextColor="White" />
+
+            <CollectionView
+                x:Name="UsersCollection"
+                HeightRequest="260"
+                SelectionMode="None">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border
+                            BackgroundColor="#1F2937"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="14,10">
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type toolkit:Popup}}, Path=BindingContext.SelectCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Border.GestureRecognizers>
+
+                            <Grid ColumnDefinitions="36,*" ColumnSpacing="12">
+
+                                <Border
+                                    WidthRequest="32"
+                                    HeightRequest="32"
+                                    BackgroundColor="#312E81"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 16"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="{Binding Initials}"
+                                        TextColor="White"
+                                        FontAttributes="Bold"
+                                        FontSize="12"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+
+                                    <Label
+                                        Text="{Binding FullName}"
+                                        TextColor="White"
+                                        FontSize="14"
+                                        FontAttributes="Bold" />
+
+                                    <Label
+                                        Text="{Binding Role}"
+                                        TextColor="#94A3B8"
+                                        FontSize="11" />
+
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+
+                <Label Grid.Column="0"
+                       Text="{Binding PageLabel}"
+                       TextColor="#9CA3AF"
+                       VerticalOptions="Center" />
+
+                <Button Grid.Column="1"
+                        Text="◀"
+                        Command="{Binding PreviousPageCommand}"
+                        IsEnabled="{Binding HasPreviousPage}"
+                        BackgroundColor="#1F2937"
+                        TextColor="White"
+                        CornerRadius="10"
+                        WidthRequest="44"
+                        HeightRequest="36" />
+
+                <Button Grid.Column="2"
+                        Text="▶"
+                        Command="{Binding NextPageCommand}"
+                        IsEnabled="{Binding HasNextPage}"
+                        BackgroundColor="#1F2937"
+                        TextColor="White"
+                        CornerRadius="10"
+                        WidthRequest="44"
+                        HeightRequest="36" />
+
+            </Grid>
+
+            <Button
+                Text="Cancel"
+                Clicked="CancelClicked"
+                BackgroundColor="#374151"
+                TextColor="White"
+                CornerRadius="10"
+                HeightRequest="42" />
+
+        </VerticalStackLayout>
+
+    </Border>
+
+</toolkit:Popup>

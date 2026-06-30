@@ -9,8 +9,10 @@ public class WorkItemTests
     {
         return new WorkItem(
             "Implement auth",
+            "Comment",
             "user1",
             1,
+            WorkItemStatus.ToDo,
             WorkItemPriority.High);
     }
 
@@ -31,9 +33,11 @@ public class WorkItemTests
     {
         Assert.Throws<ArgumentException>(() =>
             new WorkItem(
-                "",
+                "Implement auth",
+                "Comment",
                 "user1",
                 1,
+                WorkItemStatus.ToDo,
                 WorkItemPriority.High));
     }
 
@@ -42,9 +46,11 @@ public class WorkItemTests
     {
         Assert.Throws<ArgumentException>(() =>
             new WorkItem(
-                "Task",
-                "",
+                "Implement auth",
+                "Comment",
+                "user1",
                 1,
+                WorkItemStatus.ToDo,
                 WorkItemPriority.High));
     }
 
@@ -53,9 +59,11 @@ public class WorkItemTests
     {
         Assert.Throws<ArgumentException>(() =>
             new WorkItem(
-                "Task",
+                "Implement auth",
+                "Comment",
                 "user1",
-                0,
+                1,
+                WorkItemStatus.ToDo,
                 WorkItemPriority.High));
     }
 

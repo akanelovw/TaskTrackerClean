@@ -4,6 +4,7 @@ using TaskTracker.Api.Common;
 using TaskTracker.Application.Projects.AddProjectMember;
 using TaskTracker.Application.Projects.AssignProjectManager;
 using TaskTracker.Application.Projects.ChangeProjectStatus;
+using TaskTracker.Application.Projects.ChangeProjectPriority;
 using TaskTracker.Application.Projects.CreateProject;
 using TaskTracker.Application.Projects.DeleteProject;
 using TaskTracker.Application.Projects.GetProjectDetails;
@@ -25,6 +26,7 @@ public class ProjectsController : ControllerBase
     private readonly DeleteProjectUseCase _delete;
     private readonly AssignProjectManagerUseCase _assignManager;
     private readonly ChangeProjectStatusUseCase _changeProjectStatus;
+    private readonly ChangeProjectPriorityUseCase _changeProjectPriority;
     private readonly AddProjectMemberUseCase _addMember;
     private readonly RemoveProjectMemberUseCase _removeMember;
 
@@ -36,6 +38,7 @@ public class ProjectsController : ControllerBase
         DeleteProjectUseCase delete,
         AssignProjectManagerUseCase assignManager,
         ChangeProjectStatusUseCase changeProjectStatus,
+        ChangeProjectPriorityUseCase changeProjectPriority,
         AddProjectMemberUseCase addMember,
         RemoveProjectMemberUseCase removeMember)
     {
@@ -46,6 +49,7 @@ public class ProjectsController : ControllerBase
         _delete = delete;
         _assignManager = assignManager;
         _changeProjectStatus = changeProjectStatus;
+        _changeProjectPriority = changeProjectPriority;
         _addMember = addMember;
         _removeMember = removeMember;
     }
@@ -131,6 +135,16 @@ public class ProjectsController : ControllerBase
         await _changeProjectStatus.Execute(request);
 
         return Ok(ApiResponse.Ok("Status updated"));
+    }
+    // ================= CHANGE PRIORITY =================
+    [HttpPut("{id}/priority")]
+    public async Task<IActionResult> ChangePriority(int id, ChangeProjectPriorityRequest request)
+    {
+        request.ProjectId = id;
+
+        await _changeProjectPriority.Execute(request);
+
+        return Ok(ApiResponse.Ok("Priority updated"));
     }
 
     // ================= REMOVE MEMBER =================

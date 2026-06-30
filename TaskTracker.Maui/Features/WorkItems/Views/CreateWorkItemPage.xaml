@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="TaskTracker.Maui.Features.WorkItems.Views.CreateWorkItemPage"
+    Title="Create Work Item"
+    BackgroundColor="#0B0F17">
+
+    <ScrollView>
+
+        <Grid Padding="20">
+            <Border
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                HorizontalOptions="Center"
+                MaximumWidthRequest="560"
+                WidthRequest="560">
+
+                <VerticalStackLayout Spacing="16">
+
+                    <Label Text="Create work item"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="White" />
+
+                    <Border
+                        Padding="18"
+                        BackgroundColor="#111827"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 18">
+
+                        <VerticalStackLayout Spacing="14">
+
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Title" TextColor="#9CA3AF" FontSize="13" />
+                                <Entry
+                                    Placeholder="Task title"
+                                    Text="{Binding Title}"
+                                    TextColor="White"
+                                    PlaceholderColor="#6B7280"
+                                    BackgroundColor="#1F2937" />
+                                <Label Text="{Binding TitleError}"
+                                       TextColor="#EF4444"
+                                       FontSize="12" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Comment" TextColor="#9CA3AF" FontSize="13" />
+                                <Entry
+                                    Placeholder="Description / comment"
+                                    Text="{Binding Comment}"
+                                    TextColor="White"
+                                    PlaceholderColor="#6B7280"
+                                    BackgroundColor="#1F2937" />
+                                <Label Text="{Binding CommentError}"
+                                       TextColor="#EF4444"
+                                       FontSize="12" />
+                            </VerticalStackLayout>
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="Status" TextColor="#9CA3AF" FontSize="13" />
+                                    <Picker
+                                        ItemsSource="{Binding Statuses}"
+                                        SelectedItem="{Binding Status}"
+                                        TextColor="White"
+                                        BackgroundColor="#1F2937" />
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                    <Label Text="Priority" TextColor="#9CA3AF" FontSize="13" />
+                                    <Picker
+                                        ItemsSource="{Binding Priorities}"
+                                        SelectedItem="{Binding Priority}"
+                                        TextColor="White"
+                                        BackgroundColor="#1F2937" />
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+                    <Button
+                        Text="Create"
+                        Command="{Binding CreateCommand}"
+                        BackgroundColor="#4F46E5"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="48"
+                        FontAttributes="Bold" />
+
+                </VerticalStackLayout>
+
+            </Border>
+        </Grid>
+
+    </ScrollView>
+
+</ContentPage>

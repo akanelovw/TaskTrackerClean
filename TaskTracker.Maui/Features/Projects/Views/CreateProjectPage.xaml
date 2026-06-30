@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="TaskTracker.Maui.Features.Projects.Views.CreateProjectPage"
+    Title="Create Project"
+    BackgroundColor="#0B0F17">
+
+    <ScrollView>
+
+        <Grid Padding="20">
+            <Border
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                HorizontalOptions="Center"
+                MaximumWidthRequest="560"
+                WidthRequest="560">
+
+                <VerticalStackLayout Spacing="16">
+
+                    <Label
+                        Text="Create project"
+                        FontSize="28"
+                        FontAttributes="Bold"
+                        TextColor="White" />
+
+                    <Border
+                        Padding="18"
+                        BackgroundColor="#111827"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 18">
+
+                        <VerticalStackLayout Spacing="14">
+
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Title" TextColor="#9CA3AF" FontSize="13" />
+                                <Entry
+                                    Placeholder="Project title"
+                                    Text="{Binding Title}"
+                                    TextColor="White"
+                                    PlaceholderColor="#6B7280"
+                                    BackgroundColor="#1F2937" />
+                                <Label Text="{Binding TitleError}"
+                                       TextColor="#EF4444"
+                                       FontSize="12" />
+                            </VerticalStackLayout>
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="Customer" TextColor="#9CA3AF" FontSize="13" />
+                                    <Entry
+                                        Placeholder="Customer company"
+                                        Text="{Binding CustomerCompany}"
+                                        TextColor="White"
+                                        PlaceholderColor="#6B7280"
+                                        BackgroundColor="#1F2937" />
+                                    <Label Text="{Binding CustomerCompanyError}"
+                                           TextColor="#EF4444"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                    <Label Text="Executor" TextColor="#9CA3AF" FontSize="13" />
+                                    <Entry
+                                        Placeholder="Executor company"
+                                        Text="{Binding ExecutorCompany}"
+                                        TextColor="White"
+                                        PlaceholderColor="#6B7280"
+                                        BackgroundColor="#1F2937" />
+                                    <Label Text="{Binding ExecutorCompanyError}"
+                                           TextColor="#EF4444"
+                                           FontSize="12" />
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="Start date" TextColor="#9CA3AF" FontSize="13" />
+                                    <DatePicker
+                                        Date="{Binding StartTime}"
+                                        TextColor="White"
+                                        BackgroundColor="#1F2937" />
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                    <Label Text="End date" TextColor="#9CA3AF" FontSize="13" />
+                                    <DatePicker
+                                        Date="{Binding EndTime}"
+                                        TextColor="White"
+                                        BackgroundColor="#1F2937" />
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                            <VerticalStackLayout Spacing="6">
+
+                                <Label Text="Priority" TextColor="#9CA3AF" FontSize="13" />
+
+                                <Picker
+                                    Title="Select priority"
+                                    ItemsSource="{Binding Priorities}"
+                                    SelectedItem="{Binding Priority}"
+                                    TextColor="White"
+                                    BackgroundColor="#1F2937" />
+
+                                <Border
+                                    Padding="10,4"
+                                    BackgroundColor="{Binding PriorityColor}"
+                                    StrokeThickness="0"
+                                    HorizontalOptions="Start"
+                                    StrokeShape="RoundRectangle 20">
+
+                                    <Label
+                                        Text="{Binding Priority}"
+                                        TextColor="White"
+                                        FontAttributes="Bold"
+                                        FontSize="12" />
+
+                                </Border>
+
+                            </VerticalStackLayout>
+
+                        </VerticalStackLayout>
+
+                    </Border>
+
+                    <Button
+                        Text="Create Project"
+                        HeightRequest="48"
+                        FontAttributes="Bold"
+                        Command="{Binding CreateCommand}"
+                        BackgroundColor="#4F46E5"
+                        TextColor="White"
+                        CornerRadius="12" />
+
+                </VerticalStackLayout>
+
+            </Border>
+        </Grid>
+
+    </ScrollView>
+
+</ContentPage>
