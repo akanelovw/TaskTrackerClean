@@ -5,7 +5,7 @@
 ## Стек
 
 - **Backend:** ASP.NET Core 10, Entity Framework Core, MS SQL Server, JWT
-- **Desktop/Mobile-клиент:** .NET MAUI 10 (Windows, Android, iOS, macOS)
+- **Desktop-клиент:** .NET MAUI 10 (Windows)
 - **Инфраструктура:** Docker, Docker Compose, Caddy (HTTPS reverse-proxy)
 
 ---
@@ -33,6 +33,7 @@ cp .env.example .env
 Откройте `.env` и заполните значения:
 
 ```env
+ASPNETCORE_ENVIRONMENT=Production
 DB_CONNECTION_STRING=Server=db,1433;Database=TaskTrackerDb;User Id=sa;Password=YourStr0ng!DbPassword;TrustServerCertificate=True
 DB_PASSWORD=YourStr0ng!DbPassword
 JWT_KEY=YourSuperSecretJwtKey_AtLeast32Characters_Long!
@@ -79,11 +80,15 @@ docker compose logs -f api
 
 Когда увидите в логах `Создан админ ...` — backend готов и админ создан с данными из вашего `.env`.
 
-API доступно по адресу: `http://localhost` (или `https://ваш-домен`, если настроен `DOMAIN`, см. ниже).
+API доступно по двум адресам одновременно:
+- `http://localhost:8080/` — прямой доступ к контейнеру `api` (удобно для разработки и отладки клиента)
+- `http://localhost/` (или `https://ваш-домен`, если настроен `DOMAIN`) — через reverse-proxy Caddy
 
-### 4. HTTPS на реальном сервере (не localhost)
+### 4. Локальное тестирование Production-режима без домена
 
-Если деплоите на сервер с публичным доменом:
+Если у вас пока нет домена и сервера — оставьте `DOMAIN` пустым в `.env`. Caddy в этом случае работает на `localhost` обычным HTTP без сертификата, а контейнер `api` доступен напрямую на порту `8080`. Этого достаточно для полноценного локального теста прод-сборки backend и MAUI-клиента.
+
+### 5. HTTPS на реальном сервере (когда появится домен)
 
 1. Направьте A-запись домена на IP вашего сервера.
 2. В `.env` укажите:
@@ -92,14 +97,27 @@ API доступно по адресу: `http://localhost` (или `https://ва
    ACME_EMAIL=you@yourdomain.com
 ```
 3. Откройте порты **80** и **443** на сервере (firewall / security group облака).
-4. Запустите:
+4. Для безопасности закройте прямой доступ к `8080` снаружи — в `docker-compose.yml` у сервиса `api` замените `ports: ["8080:8080"]` на `expose: ["8080"]`, чтобы трафик шёл только через Caddy с HTTPS.
+5. Запустите:
 ```bash
    docker compose up -d --build
 ```
 
 Caddy автоматически получит SSL-сертификат от Let's Encrypt и будет поддерживать его актуальным. API станет доступен по `https://api.yourdomain.com`.
 
-Для локального запуска без домена просто оставьте `DOMAIN` пустым — всё будет работать по `http://localhost`.
+### Переключение между Development и Production
+
+Режим управляется переменной `ASPNETCORE_ENVIRONMENT` в `.env`:
+
+```env
+ASPNETCORE_ENVIRONMENT=Development   # включает Scalar UI на /scalar/v1, подробные ошибки
+ASPNETCORE_ENVIRONMENT=Production    # для реального использования
+```
+
+После изменения пересоберите:
+```bash
+docker compose up -d --build api
+```
 
 ---
 
@@ -107,13 +125,13 @@ Caddy автоматически получит SSL-сертификат от Le
 
 ### Скачать готовую сборку
 
-Скачайте архив с последним релизом со страницы [Releases](https://github.com/yourname/tasktracker/releases), распакуйте и запустите `TaskTracker.Maui.exe`.
+Скачайте архив с последним релизом со страницы [Releases](https://github.com/yourname/tasktracker/releases), распакуйте и запустите `TaskTracker.exe`.
 
-> Установка .NET runtime **не требуется** — всё включено в архив.
+> Установка .NET runtime **не требуется** — всё включено в архив (self-contained сборка).
 
 ### Настройка адреса API
 
-После первого запуска рядом с `TaskTracker.Maui.exe` автоматически появится файл `config.json`:
+В архиве рядом с `TaskTracker.exe` лежит файл `config.json`:
 
 ```json
 {
@@ -121,7 +139,15 @@ Caddy автоматически получит SSL-сертификат от Le
 }
 ```
 
-Если ваш backend запущен на другом адресе или другой машине — откройте `config.json` в любом текстовом редакторе, измените адрес (например, `http://192.168.1.10/` или `https://api.yourdomain.com/`) и перезапустите приложение. **Пересборка не требуется.**
+Если ваш backend запущен на другом адресе — откройте `config.json` в любом текстовом редакторе, измените адрес и перезапустите приложение. **Пересборка не требуется.**
+
+> Если файл `config.json` отсутствует или повреждён — приложение использует адрес `http://localhost:8080/` по умолчанию.
+
+Примеры значений:
+- Backend в Docker на этой же машине: `http://localhost:8080/`
+- Backend через Caddy на этой же машине (без домена): `http://localhost/`
+- Backend на другой машине в локальной сети: `http://192.168.1.10:8080/`
+- Backend на реальном сервере с доменом: `https://api.yourdomain.com/`
 
 ### Войдите в систему
 
@@ -163,7 +189,7 @@ docker compose logs -f api
 # Посмотреть логи базы данных
 docker compose logs -f db
 
-# Посмотреть логи Caddy (HTTPS)
+# Посмотреть логи Caddy
 docker compose logs -f caddy
 
 # Пересобрать после изменений в коде
@@ -207,7 +233,17 @@ dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
 
 > Параметр `-p:TargetFrameworks=net10.0-windows10.0.19041.0` обязателен — проект мультитаргетный (Android/iOS/MacCatalyst/Windows), и без него restore попытается резолвить зависимости сразу для всех платформ, что приводит к ошибкам поиска несуществующих пакетов.
 
-Готовый `.exe` будет в папке `publish/windows`.
+После публикации скопируйте конфиг рядом с собранным `.exe`:
+
+```bash
+cp TaskTracker.Maui/config.json ./publish/windows/config.json
+```
+
+Готовый `TaskTracker.exe` вместе с `config.json` будет в папке `publish/windows`.
+
+```powershell
+Compress-Archive -Path ./publish/windows/* -DestinationPath TaskTracker-win-x64.zip
+```
 
 ---
 
@@ -219,7 +255,7 @@ tasktracker/
 ├── TaskTracker.Application/        # Use cases, интерфейсы
 ├── TaskTracker.Domain/             # Доменные сущности
 ├── TaskTracker.Infrastructure/     # EF Core, репозитории, сервисы
-├── TaskTracker.Maui/               # .NET MAUI клиент (Windows/Android/iOS)
+├── TaskTracker.Maui/               # .NET MAUI клиент (Windows)
 ├── docker-compose.yml
 ├── Caddyfile
 ├── .env.example
@@ -232,6 +268,7 @@ tasktracker/
 
 | Переменная               | Описание                                                                  |
 |---------------------------|----------------------------------------------------------------------------|
+| `ASPNETCORE_ENVIRONMENT` | `Development` или `Production`                                          |
 | `DB_CONNECTION_STRING`   | Полная строка подключения к БД (своя или встроенная в docker-compose)    |
 | `DB_PASSWORD`            | Пароль SA для встроенного контейнера MS SQL Server                       |
 | `JWT_KEY`                | Секретный ключ для подписи JWT (мин. 32 символа)                         |
@@ -239,4 +276,4 @@ tasktracker/
 | `ADMIN_PASSWORD`         | Пароль администратора, создаваемого автоматически при первом запуске     |
 | `DOMAIN`                 | Домен для автоматического HTTPS через Let's Encrypt (необязательно)      |
 | `ACME_EMAIL`             | Email для регистрации сертификата Let's Encrypt (необязательно)          |
-| `API_PORT`               | Порт, на котором публикуется API (по умолчанию 80)                       |
+| `API_PORT`               | Порт, на котором Caddy публикует API (по умолчанию 80)                   |
