@@ -220,24 +220,6 @@ dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
 
 Готовый `.exe` будет в папке `publish/windows`.
 
-### Mobile-клиент (Android)
-
-```bash
-dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
-  -f net10.0-android \
-  -c Release \
-  -o ./publish/android
-```
-
-### Mobile-клиент (iOS / macOS) — требуется macOS с Xcode
-
-```bash
-dotnet publish TaskTracker.Maui/TaskTracker.Maui.csproj \
-  -f net10.0-ios \
-  -c Release \
-  -o ./publish/ios
-```
-
 ---
 
 ## Структура проекта
