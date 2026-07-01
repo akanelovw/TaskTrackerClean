@@ -2,7 +2,6 @@
 
 ![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Build](https://github.com/akanelovw/TaskTrackerClean/actions/workflows/ci.yml/badge.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)
 
 Система управления проектами и задачами с ролевой моделью доступа. Backend на ASP.NET Core (Clean Architecture) + desktop-клиент на .NET MAUI.
