@@ -69,45 +69,52 @@ TaskTracker.Maui            — desktop-клиент (MVVM, CommunityToolkit.Mvv
 
 ## Скриншоты
 
+<details>
+<summary><b>## Скриншотыs</b></summary>
+
+<br>
+
+<h3 align="center">Login</h3>
 <p align="center">
-  <b>Login</b><br><br>
   <img src="docs/login.png" width="800" alt="Login">
 </p>
 
+<h3 align="center">Projects</h3>
 <p align="center">
-  <b>Projects</b><br><br>
   <img src="docs/projects.png" width="800" alt="Projects">
 </p>
 
+<h3 align="center">Project Details</h3>
 <p align="center">
-  <b>Project Details</b><br><br>
   <img src="docs/projectdetails.png" width="800" alt="Project Details">
 </p>
 
+<h3 align="center">Project Files</h3>
 <p align="center">
-  <b>Project Files</b><br><br>
   <img src="docs/projectfiles.png" width="800" alt="Project Files">
 </p>
 
+<h3 align="center">Add Member</h3>
 <p align="center">
-  <b>Add Member</b><br><br>
   <img src="docs/addmember.png" width="800" alt="Add Member">
 </p>
 
+<h3 align="center">Users</h3>
 <p align="center">
-  <b>Users</b><br><br>
   <img src="docs/users.png" width="800" alt="Users">
 </p>
 
+<h3 align="center">Create User</h3>
 <p align="center">
-  <b>Create User</b><br><br>
   <img src="docs/usercreate.png" width="800" alt="Create User">
 </p>
 
+<h3 align="center">User Details</h3>
 <p align="center">
-  <b>User Details</b><br><br>
   <img src="docs/userdetails.png" width="800" alt="User Details">
 </p>
+
+</details>
 
 ## Стек
 
