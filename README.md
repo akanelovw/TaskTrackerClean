@@ -69,16 +69,14 @@ TaskTracker.Maui            — desktop-клиент (MVVM, CommunityToolkit.Mvv
 
 ## Скриншоты
 
-> _TODO: добавить скриншоты экрана логина, списка проектов и деталей проекта._
-> Проще всего — открыть приложение, сделать 2-3 скриншота (Win+Shift+S), сохранить в `docs/screenshots/` и вставить сюда:
-> `![Login](docs/login.png)`
-> `![Projects](docs/projects.png)`
-> `![Project Details](docs/projectdetails.png)`
-> `![Project Files](docs/projectfiles.png)`
-> `![Add Member](docs/addmember.png)`
-> `![Users(docs/users.png)`
-> `![User Create](docs/usercreate.png)`
-> `![User Details](docs/userdetails.png)`
+![Login](docs/login.png)
+![Projects](docs/projects.png)
+![Project Details](docs/projectdetails.png)
+![Project Files](docs/projectfiles.png)
+![Add Member](docs/addmember.png)
+![Users](docs/users.png)
+![User Create](docs/usercreate.png)
+![User Details](docs/userdetails.png)
 
 ## Стек
 
