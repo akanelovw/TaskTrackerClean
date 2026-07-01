@@ -4,6 +4,7 @@
     <BuildType Name="Release" />
     <BuildType Name="Test" />
   </Configurations>
+  <Folder Name="/Docs/" />
   <Folder Name="/Solution Items/">
     <File Path=".dockerignore" />
     <File Path=".env" />
