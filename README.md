@@ -125,7 +125,7 @@ docker compose up -d --build api
 
 ### Скачать готовую сборку
 
-Скачайте архив с последним релизом со страницы [Releases](https://github.com/yourname/tasktracker/releases), распакуйте и запустите `TaskTracker.exe`.
+Скачайте архив с последним релизом со страницы [Releases](https://github.com/akanelovw/TaskTrackerClean/releases), распакуйте и запустите `TaskTracker.exe`.
 
 > Установка .NET runtime **не требуется** — всё включено в архив (self-contained сборка).
 
