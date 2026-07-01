@@ -1,12 +1,91 @@
 # TaskTracker
 
-Система управления проектами и задачами с разграничением доступа по ролям.
+![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Build](https://github.com/akanelovw/TaskTrackerClean/actions/workflows/ci.yml/badge.svg)
+![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)
+
+Система управления проектами и задачами с ролевой моделью доступа. Backend на ASP.NET Core (Clean Architecture) + desktop-клиент на .NET MAUI.
+
+## Содержание
+
+- [О проекте](#о-проекте)
+- [Функционал](#функционал)
+- [Архитектура](#архитектура)
+- [Скриншоты](#скриншоты)
+- [Стек](#стек)
+- [Быстрый старт (backend)](#быстрый-старт-backend)
+- [Desktop-клиент (Windows)](#desktop-клиент-windows)
+- [Роли пользователей](#роли-пользователей)
+- [Тестирование](#тестирование)
+- [Управление контейнерами](#управление-контейнерами)
+- [Сборка из исходников](#сборка-из-исходников)
+- [Структура проекта](#структура-проекта)
+- [Переменные окружения](#переменные-окружения)
+- [Планы по развитию](#планы-по-развитию)
+
+---
+
+## О проекте
+
+Pet-проект, написанный чтобы на практике закрепить Clean Architecture, ролевую авторизацию, работу с EF Core/MS SQL Server и полноценный деплой (Docker + автоматический HTTPS), а не остановиться на «работает на localhost».
+
+Помимо backend'а, проект включает desktop-клиент на .NET MAUI с собственной логикой обработки ошибок сети, ретраев HTTP-запросов и постраничной навигацией — то есть это не просто CRUD API, а система с реальным клиентским приложением поверх него.
+
+## Функционал
+
+**Проекты**
+- Создание, редактирование, удаление
+- Смена статуса и приоритета
+- Назначение менеджера проекта
+- Добавление/удаление участников (с пагинацией)
+
+**Задачи**
+- Создание, редактирование, удаление
+- Назначение исполнителя
+- Смена статуса и приоритета
+- Пагинация списка задач
+
+**Документы**
+- Загрузка, скачивание и удаление файлов проекта
+
+**Доступ**
+- 4 роли: `Admin`, `ChiefProjectManager`, `ProjectManager`, `Worker`
+- У каждой роли — свой набор разрешённых действий, проверяемый **и на клиенте** (скрытие недоступных элементов UI), **и на сервере** (в use case'ах — на случай прямого вызова API в обход клиента)
+
+## Архитектура
+
+Backend построен по Clean Architecture с чётким разделением слоёв:
+
+```
+TaskTracker.Domain          — сущности и бизнес-правила, без внешних зависимостей
+TaskTracker.Application     — use case'ы, интерфейсы репозиториев/сервисов
+TaskTracker.Infrastructure  — EF Core, репозитории, JWT, файловое хранилище
+TaskTracker.WebApi          — контроллеры, DI-регистрация, middleware
+TaskTracker.Maui            — desktop-клиент (MVVM, CommunityToolkit.Mvvm)
+```
+
+Каждый юзкейс — отдельный класс с единственной ответственностью (`AddProjectMemberUseCase`, `ChangeWorkItemStatusUseCase` и т.д.), что упрощает тестирование и чтение бизнес-логики.
+
+## Скриншоты
+
+> _TODO: добавить скриншоты экрана логина, списка проектов и деталей проекта._
+> Проще всего — открыть приложение, сделать 2-3 скриншота (Win+Shift+S), сохранить в `docs/screenshots/` и вставить сюда:
+> `![Login](docs/login.png)`
+> `![Projects](docs/projects.png)`
+> `![Project Details](docs/projectdetails.png)`
+> `![Project Files](docs/projectfiles.png)`
+> `![Add Member](docs/addmember.png)`
+> `![Users(docs/users.png)`
+> `![User Create](docs/usercreate.png)`
+> `![User Details](docs/userdetails.png)`
 
 ## Стек
 
-- **Backend:** ASP.NET Core 10, Entity Framework Core, MS SQL Server, JWT
-- **Desktop-клиент:** .NET MAUI 10 (Windows)
-- **Инфраструктура:** Docker, Docker Compose, Caddy (HTTPS reverse-proxy)
+**Backend:** ASP.NET Core 10, Entity Framework Core, MS SQL Server, ASP.NET Identity, JWT, FluentValidation
+**Desktop-клиент:** .NET MAUI 10 (Windows), CommunityToolkit.Mvvm, CommunityToolkit.Maui
+**Тестирование:** xUnit
+**Инфраструктура:** Docker, Docker Compose, Caddy (HTTPS reverse-proxy), GitHub Actions (CI)
 
 ---
 
@@ -20,8 +99,8 @@
 ### 1. Клонируйте репозиторий
 
 ```bash
-git clone https://github.com/yourname/tasktracker.git
-cd tasktracker
+git clone https://github.com/akanelovw/TaskTrackerClean.git
+cd TaskTrackerClean
 ```
 
 ### 2. Создайте файл `.env`
@@ -81,6 +160,7 @@ docker compose logs -f api
 Когда увидите в логах `Создан админ ...` — backend готов и админ создан с данными из вашего `.env`.
 
 API доступно по двум адресам одновременно:
+
 - `http://localhost:8080/` — прямой доступ к контейнеру `api` (удобно для разработки и отладки клиента)
 - `http://localhost/` (или `https://ваш-домен`, если настроен `DOMAIN`) — через reverse-proxy Caddy
 
@@ -92,15 +172,18 @@ API доступно по двум адресам одновременно:
 
 1. Направьте A-запись домена на IP вашего сервера.
 2. В `.env` укажите:
+
 ```env
-   DOMAIN=api.yourdomain.com
-   ACME_EMAIL=you@yourdomain.com
+DOMAIN=api.yourdomain.com
+ACME_EMAIL=you@yourdomain.com
 ```
+
 3. Откройте порты **80** и **443** на сервере (firewall / security group облака).
 4. Для безопасности закройте прямой доступ к `8080` снаружи — в `docker-compose.yml` у сервиса `api` замените `ports: ["8080:8080"]` на `expose: ["8080"]`, чтобы трафик шёл только через Caddy с HTTPS.
 5. Запустите:
+
 ```bash
-   docker compose up -d --build
+docker compose up -d --build
 ```
 
 Caddy автоматически получит SSL-сертификат от Let's Encrypt и будет поддерживать его актуальным. API станет доступен по `https://api.yourdomain.com`.
@@ -115,6 +198,7 @@ ASPNETCORE_ENVIRONMENT=Production    # для реального использ�
 ```
 
 После изменения пересоберите:
+
 ```bash
 docker compose up -d --build api
 ```
@@ -144,6 +228,7 @@ docker compose up -d --build api
 > Если файл `config.json` отсутствует или повреждён — приложение использует адрес `http://localhost:8080/` по умолчанию.
 
 Примеры значений:
+
 - Backend в Docker на этой же машине: `http://localhost:8080/`
 - Backend через Caddy на этой же машине (без домена): `http://localhost/`
 - Backend на другой машине в локальной сети: `http://192.168.1.10:8080/`
@@ -154,7 +239,7 @@ docker compose up -d --build api
 Используйте учётные данные из вашего `.env`:
 
 | Поле     | Значение                            |
-|----------|--------------------------------------|
+| -------- | ------------------------------------ |
 | Email    | значение `ADMIN_EMAIL` из `.env`    |
 | Password | значение `ADMIN_PASSWORD` из `.env` |
 
@@ -162,12 +247,33 @@ docker compose up -d --build api
 
 ## Роли пользователей
 
-| Роль                  | Возможности                                              |
-|-----------------------|-----------------------------------------------------------|
-| **Admin**              | Полный доступ ко всему, управление пользователями          |
-| **ChiefProjectManager**| Все проекты, создание проектов, назначение менеджеров      |
-| **ProjectManager**     | Только свои проекты, создание задач, управление командой    |
-| **Worker**             | Только свои задачи, смена статуса назначенных задач         |
+| Роль                    | Возможности                                                |
+| ------------------------ | ----------------------------------------------------------- |
+| **Admin**               | Полный доступ ко всему, управление пользователями          |
+| **ChiefProjectManager** | Все проекты, создание проектов, назначение менеджеров      |
+| **ProjectManager**      | Только свои проекты, создание задач, управление командой   |
+| **Worker**              | Только свои задачи, смена статуса назначенных задач         |
+
+---
+
+## Тестирование
+
+Проект покрыт тремя видами тестов:
+
+| Проект                                | Что проверяет                                    |
+| -------------------------------------- | ------------------------------------------------- |
+| `TaskTracker.Domain.Tests`            | Бизнес-правила доменных сущностей                 |
+| `TaskTracker.Application.Tests`       | Логику use case'ов (в изоляции, с моками)         |
+| `TaskTracker.Api.IntegrationTests`    | Полный HTTP-цикл API поверх реальной инфраструктуры |
+
+Запуск unit-тестов локально:
+
+```bash
+dotnet test TaskTracker.Domain.Tests/TaskTracker.Domain.Tests.csproj
+dotnet test TaskTracker.Application.Tests/TaskTracker.Application.Tests.csproj
+```
+
+При каждом push в `master` тесты автоматически прогоняются в GitHub Actions — см. бейдж `Build` в начале файла.
 
 ---
 
@@ -211,6 +317,7 @@ docker compose up -d --build
 ### Desktop-клиент (Windows)
 
 **Требования:**
+
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10)
 - Windows 10 версии 19041 или новее
 - Рабочая нагрузка `.NET MAUI` (`dotnet workload install maui-windows`)
@@ -249,13 +356,17 @@ Compress-Archive -Path ./publish/windows/* -DestinationPath TaskTracker-win-x64.
 
 ## Структура проекта
 
-```text
-tasktracker/
-├── TaskTracker.WebApi/             # ASP.NET Core Web API
-├── TaskTracker.Application/        # Use cases, интерфейсы
-├── TaskTracker.Domain/             # Доменные сущности
-├── TaskTracker.Infrastructure/     # EF Core, репозитории, сервисы
-├── TaskTracker.Maui/               # .NET MAUI клиент (Windows)
+```
+TaskTrackerClean/
+├── TaskTracker.WebApi/               # ASP.NET Core Web API
+├── TaskTracker.Application/          # Use cases, интерфейсы
+├── TaskTracker.Application.Tests/    # Unit-тесты use case'ов
+├── TaskTracker.Domain/               # Доменные сущности
+├── TaskTracker.Domain.Tests/         # Unit-тесты домена
+├── TaskTracker.Infrastructure/       # EF Core, репозитории, сервисы
+├── TaskTracker.Api.IntegrationTests/ # Интеграционные тесты API
+├── TaskTracker.Maui/                 # .NET MAUI клиент (Windows)
+├── .github/workflows/ci.yml          # CI: build + test
 ├── docker-compose.yml
 ├── Caddyfile
 ├── .env.example
@@ -266,14 +377,29 @@ tasktracker/
 
 ## Переменные окружения
 
-| Переменная               | Описание                                                                  |
-|---------------------------|----------------------------------------------------------------------------|
-| `ASPNETCORE_ENVIRONMENT` | `Development` или `Production`                                          |
-| `DB_CONNECTION_STRING`   | Полная строка подключения к БД (своя или встроенная в docker-compose)    |
-| `DB_PASSWORD`            | Пароль SA для встроенного контейнера MS SQL Server                       |
-| `JWT_KEY`                | Секретный ключ для подписи JWT (мин. 32 символа)                         |
-| `ADMIN_EMAIL`            | Email администратора, создаваемого автоматически при первом запуске      |
-| `ADMIN_PASSWORD`         | Пароль администратора, создаваемого автоматически при первом запуске     |
-| `DOMAIN`                 | Домен для автоматического HTTPS через Let's Encrypt (необязательно)      |
-| `ACME_EMAIL`             | Email для регистрации сертификата Let's Encrypt (необязательно)          |
-| `API_PORT`               | Порт, на котором Caddy публикует API (по умолчанию 80)                   |
+| Переменная               | Описание                                                              |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `ASPNETCORE_ENVIRONMENT` | `Development` или `Production`                                        |
+| `DB_CONNECTION_STRING`   | Полная строка подключения к БД (своя или встроенная в docker-compose) |
+| `DB_PASSWORD`            | Пароль SA для встроенного контейнера MS SQL Server                    |
+| `JWT_KEY`                | Секретный ключ для подписи JWT (мин. 32 символа)                      |
+| `ADMIN_EMAIL`            | Email администратора, создаваемого автоматически при первом запуске   |
+| `ADMIN_PASSWORD`         | Пароль администратора, создаваемого автоматически при первом запуске  |
+| `DOMAIN`                 | Домен для автоматического HTTPS через Let's Encrypt (необязательно)   |
+| `ACME_EMAIL`             | Email для регистрации сертификата Let's Encrypt (необязательно)       |
+| `API_PORT`               | Порт, на котором Caddy публикует API (по умолчанию 80)                |
+
+---
+
+## Планы по развитию
+
+- [ ] Покрыть Infrastructure-слой тестами
+- [ ] Добавить сборку под Android
+- [ ] Email-уведомления о назначении задачи
+- [ ] Rate limiting на API
+
+---
+
+## Лицензия
+
+[MIT](./LICENSE.txt)
