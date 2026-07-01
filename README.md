@@ -70,7 +70,7 @@ TaskTracker.Maui            — desktop-клиент (MVVM, CommunityToolkit.Mvv
 ## Скриншоты
 
 <details>
-<summary><b>## Скриншотыs</b></summary>
+<summary><b>Открыть / Закрыть</b></summary>
 
 <br>
 
